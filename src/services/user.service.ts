@@ -10,6 +10,7 @@ import { UserRepository } from '../repositories/user.repository';
 import UnauthorizedError from '../errors/custom/unauthorized.error.class';
 import ConflictError from '../errors/custom/conflict.error.class';
 import logger from '../helpers/logger';
+import { PrismaClientKnownRequestError } from '../generated/prisma/runtime/library';
 
 dotenv.config();
 
@@ -30,16 +31,16 @@ export class UserService {
     return user == null;
   }
   async createUser(userParams: UserParams) {
-    logger.info({ name: UserService.name, data: 'here' });
-
-    const isValid = await this.isValidEmail(userParams.email);
-    logger.info({ name: UserService.name, data: isValid });
-
-    if (!isValid) {
-      throw new ConflictError('email already exists'); //catch the error in the auth controller
+    try {
+      const user = await this.userRepo.create(userParams);
+      return user;
+    } catch (err) {
+      logger.error(err);
+      //P2002 is unique constraint error in prisma
+      if (err instanceof PrismaClientKnownRequestError && err.code == 'P2002')
+        err = new ConflictError('email already exists');
+      throw err;
     }
-    const user = await this.userRepo.create(userParams);
-    return user;
   }
   async hashPassword(password: string) {
     const salt = await bcrypt.genSalt(Number(BCRYPT_SALT_ROUNDS));
