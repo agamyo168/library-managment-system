@@ -1,12 +1,18 @@
 import express from 'express';
-import authRoute from './auth.route';
-import authHandlerMiddleware from '../../../../middlewares/auth-handler.middleware';
-import { validateBodyMiddleware } from '../../../../middlewares/validation.middleware';
-import { userSchema } from '../../../../schemas/user.schema';
-import { apiLimiter } from '../../../../middlewares/rate-limiter.middleware';
+import { loginRateLimiter } from '../../../../middlewares/rate-limiter.middleware';
+import authRoutes from './auth.route';
+import { prisma } from '../../../../server';
+import { UserRepository } from '../../../../repositories/user.repository';
+import { UserService } from '../../../../services/user.service';
+import { AuthController } from '../../../controllers/auth.controller';
+//Dependency Injections:
+const userRepository = new UserRepository(prisma);
+const userService = new UserService(userRepository);
+const authController = new AuthController(userService);
 
+//Router
 const router = express.Router();
-router.use(apiLimiter);
-router.use('/auth', validateBodyMiddleware(userSchema), authRoute);
+router.use(loginRateLimiter);
+router.use('/auth', authRoutes(authController));
 
 export default router;

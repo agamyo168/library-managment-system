@@ -1,6 +1,10 @@
 export interface UserParams {
   password: string;
-  username: string;
+  name: string;
+  email: string;
+}
+export interface LoginParams {
+  password: string;
   email: string;
 }
 // export default interface User extends Model {

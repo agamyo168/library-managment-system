@@ -1,41 +1,70 @@
 import jwt from 'jsonwebtoken';
 
-import { UserParams } from '../types/users/user.interface';
+import { LoginParams, UserParams } from '../types/users/user.interface';
+import * as bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
-import { prisma } from '../server';
+
+import { PrismaClient } from '@prisma/client';
+import BadRequestError from '../errors/custom/bad.request.error.class';
+import { UserRepository } from '../repositories/user.repository';
+import UnauthorizedError from '../errors/custom/unauthorized.error.class';
+import ConflictError from '../errors/custom/conflict.error.class';
+import logger from '../helpers/logger';
 
 dotenv.config();
 
-const { JWT_SECRET: JWT, JWT_EXPIRE: EXPIRE } = process.env;
+const {
+  JWT_SECRET: JWT,
+  JWT_EXPIRE: EXPIRE,
+  BCRYPT_SALT_ROUNDS,
+  BCRYPT_SECRET_PEPPER,
+} = process.env;
 
-const isValidEmail = async (email: string): Promise<boolean> => {
-  const user = await prisma.user.findFirst({ where: { email } });
-  return user == null;
-};
-const createUser = async (userParams: UserParams): Promise<User> => {
-  const isValid = await isValidEmail(userParams.email);
-  if (!isValid) {
-    throw new Error('email already exists'); //catch the error in the auth controller
+export class UserService {
+  private readonly userRepo: UserRepository;
+  constructor(userRepo: UserRepository) {
+    this.userRepo = userRepo;
   }
-  const user = (await Users.create({ ...userParams })) as User;
-  return user;
-};
-const generateToken = (id: number, role: string) => {
-  return jwt.sign({ id, role }, `${JWT}`, {
-    expiresIn: `${EXPIRE}`,
-  });
-};
-
-const authenticate = async (userParams: UserParams) => {
-  const user = (await Users.findOne({
-    where: { username: userParams.username },
-  })) as User;
-  const isAuthenticated = user.compare(userParams.password); //false
-  if (!isAuthenticated) {
-    throw new Error('invalid username or password'); //catch the error in the auth controller
+  async isValidEmail(email: string): Promise<boolean> {
+    const user = await this.userRepo.findByEmail(email);
+    return user == null;
   }
-  const token = generateToken(user.id, user.role);
-  return token;
-};
+  async createUser(userParams: UserParams) {
+    logger.info({ name: UserService.name, data: 'here' });
 
-export { createUser, authenticate };
+    const isValid = await this.isValidEmail(userParams.email);
+    logger.info({ name: UserService.name, data: isValid });
+
+    if (!isValid) {
+      throw new ConflictError('email already exists'); //catch the error in the auth controller
+    }
+    const user = await this.userRepo.create(userParams);
+    return user;
+  }
+  async hashPassword(password: string) {
+    const salt = await bcrypt.genSalt(Number(BCRYPT_SALT_ROUNDS));
+    return bcrypt.hash(password + BCRYPT_SECRET_PEPPER, salt);
+  }
+  private generateToken(id: number) {
+    return jwt.sign({ id }, `${JWT}`, {
+      expiresIn: `${EXPIRE}`,
+    });
+  }
+  private async comparePasword(hashedPassword: string, password: string) {
+    return bcrypt.compare(password + BCRYPT_SECRET_PEPPER, hashedPassword);
+  }
+  async authenticate(userParams: LoginParams) {
+    const user = await this.userRepo.findByEmail(userParams.email);
+    if (!user) throw new UnauthorizedError('invalid email or password'); //This error will be caught in the controller anyways and handled accordingly
+
+    const isAuthenticated = this.comparePasword(
+      user.password,
+      userParams.password
+    );
+    if (!isAuthenticated) {
+      throw new UnauthorizedError('invalid email or password');
+    }
+    const token = this.generateToken(user.id);
+    return token;
+  }
+}

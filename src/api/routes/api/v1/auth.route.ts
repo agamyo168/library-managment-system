@@ -1,10 +1,20 @@
-import express from 'express';
-import { login, signup } from '../../../controllers/auth.controller';
+import { Router } from 'express';
+import { AuthController } from '../../../controllers/auth.controller';
+import { validateBodyMiddleware } from '../../../../middlewares/validation.middleware';
+import { signInSchema, userSchema } from '../../../../schemas/user.schema';
 
-const router = express.Router();
+// This function receives the controller instance
+export default function authRoutes(authController: AuthController): Router {
+  const router = Router();
 
-router.route('/signup').post(signup);
-router.route('/login').post(login);
-//logout
+  router.post('/signup', validateBodyMiddleware(userSchema), (req, res, next) =>
+    authController.signup(req, res, next)
+  );
+  router.post(
+    '/login',
+    validateBodyMiddleware(signInSchema),
+    (req, res, next) => authController.login(req, res, next)
+  );
 
-export default router;
+  return router;
+}

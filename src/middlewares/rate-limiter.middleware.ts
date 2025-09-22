@@ -1,6 +1,6 @@
 import rateLimit from 'express-rate-limit';
 
-const apiLimiter = rateLimit({
+const loginRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
   standardHeaders: 'draft-8', // draft-6: `RateLimit-*` headers; draft-7 & draft-8: combined `RateLimit` header
@@ -8,4 +8,4 @@ const apiLimiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
 });
 
-export { apiLimiter };
+export { loginRateLimiter };

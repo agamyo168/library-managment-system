@@ -1,41 +1,41 @@
-import { Request, Response, NextFunction } from 'express';
-import { authenticate, createUser } from '../../services/user.service';
+// src/controllers/user.controller.ts
+import { NextFunction, Request, Response } from 'express';
+import { UserService } from '../../services/user.service';
 import { StatusCodes } from 'http-status-codes';
 import logger from '../../helpers/logger';
-import ConflictError from '../../errors/custom/conflict.error.class';
-import UnauthorizedError from '../../errors/custom/unauthorized.error.class';
-import { UserParams } from '../../types/users/user.interface';
 
-const signup = async (req: Request, res: Response, next: NextFunction) => {
-  //Input is a validated username, password
-  try {
-    const { username, password } = <UserParams>req.body;
-    const user = await createUser({ username, password });
-    res.status(StatusCodes.CREATED).json({
-      success: true,
-      message: { id: user.id, username: user.username },
-    });
-  } catch (err) {
-    logger.error(err);
-    return next(new ConflictError('Username already exists!'));
+export class AuthController {
+  constructor(private userService: UserService) {}
+
+  async signup(req: Request, res: Response, next: NextFunction) {
+    try {
+      // The controller passes the request data to the service
+      logger.info({ name: AuthController.name, body: { ...req.body } });
+      await this.userService.createUser(req.body);
+      res.status(StatusCodes.CREATED).json({
+        success: true,
+        message: 'Account has been created successfully!',
+      });
+    } catch (err) {
+      logger.error(err);
+      return next(err);
+    }
   }
-};
+  async login(req: Request, res: Response, next: NextFunction) {
+    try {
+      //Get email and password --> Validated with JOI
+      const { email, password } = req.body;
 
-const login = async (req: Request, res: Response, next: NextFunction) => {
-  //Get username and password --> Validated with JOI
-  const { username, password } = req.body;
-  try {
-    //Authenticate username and password
-    const token = await authenticate({ username, password });
-    //return token
-    res.status(StatusCodes.OK).json({
-      success: true,
-      token,
-    });
-  } catch (err) {
-    //Throw Error if wrong username or password
-    return next(new UnauthorizedError('invalid username or password'));
+      //Authenticate email and password
+      const token = await this.userService.authenticate({ email, password });
+      //return token
+      res.status(StatusCodes.OK).json({
+        success: true,
+        data: token,
+      });
+    } catch (err) {
+      //Throw Error if wrong email or password
+      return next(err);
+    }
   }
-};
-
-export { signup, login };
+}

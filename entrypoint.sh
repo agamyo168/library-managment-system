@@ -14,4 +14,5 @@
 
 # cp -r ./src/docs/ ./dist/docs/
 # node --env-file=.env.dev dist/server.js
+npx prisma generate
 npx nodemon src/server.ts
