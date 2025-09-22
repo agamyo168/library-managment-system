@@ -1,0 +1,34 @@
+services:
+  lms_db:
+    image: 'postgres'
+    env_file:
+      - .env.dev
+    ports:
+      - '${DB_PORT}:${DB_PORT}'
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - lms_network
+  lms:
+    build: .
+    env_file:
+      - .env.dev
+    ports:
+      - '${PORT}:${PORT}'
+    volumes:
+      - .:/app
+    depends_on:
+      lms_db:
+        condition: service_healthy
+    networks:
+      - lms_network
+
+networks:
+  lms_network:
+    driver: bridge
