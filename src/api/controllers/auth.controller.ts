@@ -2,9 +2,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { UserService } from '../../services/user.service';
 import { StatusCodes } from 'http-status-codes';
-import logger from '../../helpers/logger';
-import { PrismaClientKnownRequestError } from '../../generated/prisma/runtime/library';
-import ConflictError from '../../errors/custom/conflict.error.class';
 
 export class AuthController {
   constructor(private userService: UserService) {}

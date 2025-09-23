@@ -3,7 +3,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import UnauthorizedError from '../errors/custom/unauthorized.error.class';
 import logger from '../helpers/logger';
 
-const authHandlerMiddleware = (roles: string[]) => {
+const authHandlerMiddleware = (roles?: string[]) => {
   return (_req: Request, res: Response, next: NextFunction) => {
     const authHead = _req.headers.authorization;
     if (authHead == null || authHead.startsWith('Bearer') == false)
@@ -15,7 +15,7 @@ const authHandlerMiddleware = (roles: string[]) => {
         token,
         String(process.env.JWT_SECRET)
       ) as JwtPayload;
-      if (roles.includes(payload.role) === false)
+      if (roles && roles.includes(payload.role) === false)
         return next(new UnauthorizedError(`unauthorized access`));
       res.locals.payload = payload;
       next();

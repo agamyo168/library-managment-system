@@ -17,6 +17,8 @@ import {
 } from './middlewares/rate-limiter.middleware';
 import { UserRepository } from './repositories/user.repository';
 import { UserService } from './services/user.service';
+import bookRoutes from './api/routes/api/v1/book.route';
+import { BookController } from './api/controllers/book.controller';
 dotenv.config();
 const { PORT, HOST } = process.env;
 const app = express();
@@ -53,15 +55,18 @@ const start = async () => {
   try {
     await prisma.$connect();
     logger.info('DB Connected');
-    //Dependency Injection
+    /*Dependency Injections */
+    //User - Auth
     const userRepository = new UserRepository(prisma);
     const userService = new UserService(userRepository);
     const authController = new AuthController(userService);
+    const bookController = new BookController();
 
-    //Router
+    /*Router */
     const router = express.Router();
-    router.use(rateLimiter);
+    router.use(rateLimiter); //Generate Rate limiter
     router.use('/auth', loginRateLimiter, authRoutes(authController));
+    router.use('/books', bookRoutes(bookController));
     app.use('/api/v1/', router);
 
     // End of express middlewares stack

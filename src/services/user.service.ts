@@ -10,6 +10,7 @@ import logger from '../helpers/logger';
 import { PrismaClientKnownRequestError } from '../generated/prisma/runtime/library';
 import { EXPIRE, JWT, PEPPER, SALT } from '../constants/secrets';
 
+//TODO: Probably should create an AuthService separate from UserService
 export class UserService {
   constructor(private userRepo: UserRepository) {}
   async createUser(userParams: UserParams) {
