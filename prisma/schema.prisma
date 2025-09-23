@@ -5,8 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
+  provider      = "prisma-client-js"
+  output        = "../src/generated/prisma"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -17,42 +17,44 @@ datasource db {
 
 // Borrower
 model User {
-  id Int @id @default(autoincrement())
-  name String
-  email String @unique
-  password String
+  id             Int                @id @default(autoincrement())
+  name           String
+  email          String             @unique
+  password       String
   // role String //No need for Admin and Borrower role
-  created_at DateTime @default(now())
-  updated_at DateTime @default(now())
-  borrowed_books    BorrowingProcess[]
+  created_at     DateTime           @default(now()) //registered date 
+  updated_at     DateTime           @default(now())
+  borrowed_books BorrowingProcess[]
+
   @@map("users")
 }
 
 model Book {
-  id Int @id @default(autoincrement())
-  title String
-  author String
-  isbn String @unique
-  quantity Int 
-  shelf_loction String
-  borrowed_books    BorrowingProcess[]
-  @@map("books")
+  id             Int                @id @default(autoincrement())
+  title          String
+  author         String
+  isbn           String             @unique
+  quantity       Int
+  shelf_loction  String
+  borrowed_books BorrowingProcess[]
+
   @@index([title])
   @@index([author])
-
+  @@map("books")
 }
+
 //Can either be Borrowing Audit OR just many to many relationship to show books being borrowed currently.
 model BorrowingProcess {
-  id Int @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   borrower_id Int //userId
-  book_id Int 
-  due_date DateTime //time to return
+  book_id     Int
+  due_date    DateTime //time to return
   return_date DateTime? //return date is null until book is returned
   //Relationships
-  book        Book     @relation(fields: [book_id], references: [id])
-  borrower    User     @relation(fields: [borrower_id], references: [id])
-  
-  @@map("borrowing_process")
+  book        Book      @relation(fields: [book_id], references: [id])
+  borrower    User      @relation(fields: [borrower_id], references: [id])
+
   @@index([book_id, borrower_id]) // Composite index for efficient lookups
   @@index([due_date]) // Index for listing overdue books
+  @@map("borrowing_process")
 }

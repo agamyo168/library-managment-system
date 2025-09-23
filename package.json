@@ -59,7 +59,8 @@
     "migrate:deploy": "npx prisma deploy",
     "generate": "npx prisma generate",
     "migrate:dev": "npx prisma migrate dev",
-    "prisma:format": "npx prisma format"
+    "prisma:format": "npx prisma format",
+    "app:shell": "sudo docker exec -it library-management-system-app-lms-1 sh"
   },
   "author": "",
   "license": "ISC",
