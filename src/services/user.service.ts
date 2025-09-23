@@ -22,17 +22,11 @@ const {
 } = process.env;
 
 export class UserService {
-  private readonly userRepo: UserRepository;
-  constructor(userRepo: UserRepository) {
-    this.userRepo = userRepo;
-  }
-  async isValidEmail(email: string): Promise<boolean> {
-    const user = await this.userRepo.findByEmail(email);
-    return user == null;
-  }
+  constructor(private userRepo: UserRepository) {}
   async createUser(userParams: UserParams) {
     try {
-      const hashedPassword = await this.hashPassword(userParams.password);
+      const { password } = userParams;
+      const hashedPassword = await this.hashPassword(password);
       const user = await this.userRepo.create({
         ...userParams,
         password: hashedPassword,
@@ -58,13 +52,13 @@ export class UserService {
   private async comparePasword(hashedPassword: string, password: string) {
     return bcrypt.compare(password + BCRYPT_SECRET_PEPPER, hashedPassword);
   }
-  async authenticate(userParams: LoginParams) {
-    const user = await this.userRepo.findByEmail(userParams.email);
+  async authenticate(dto: LoginParams) {
+    const user = await this.userRepo.findByEmail(dto.email);
     if (!user) throw new UnauthorizedError('invalid email or password'); //This error will be caught in the controller anyways and handled accordingly
 
-    const isAuthenticated = this.comparePasword(
+    const isAuthenticated = await this.comparePasword(
       user.password,
-      userParams.password
+      dto.password
     );
     if (!isAuthenticated) {
       throw new UnauthorizedError('invalid email or password');
