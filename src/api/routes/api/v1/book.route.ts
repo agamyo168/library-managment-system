@@ -1,8 +1,11 @@
 import { Router } from 'express';
-import { validateBodyMiddleware } from '../../../../middlewares/validation.middleware';
+import {
+  validateBodyMiddleware,
+  validateParamsMiddleware,
+} from '../../../../middlewares/validation.middleware';
 import { BookController } from '../../../controllers/book.controller';
 import authHandlerMiddleware from '../../../../middlewares/auth-handler.middleware';
-import { bookSchema } from '../../../../schemas/book.schema';
+import { bookIdSchema, bookSchema } from '../../../../schemas/book.schema';
 
 export default function bookRoutes(bookController: BookController): Router {
   const router = Router();
@@ -17,10 +20,14 @@ export default function bookRoutes(bookController: BookController): Router {
     '/:id',
     authHandlerMiddleware(),
     validateBodyMiddleware(bookSchema), //Same as create because we are using a put endpoint --- doesn't necessary have to create a resource js
+    validateParamsMiddleware(bookIdSchema),
     (req, res, next) => bookController.updateBook(req, res, next)
   );
-  router.delete('/:id', authHandlerMiddleware(), (req, res, next) =>
-    bookController.deleteBook(req, res, next)
+  router.delete(
+    '/:id',
+    authHandlerMiddleware(),
+    validateParamsMiddleware(bookIdSchema),
+    (req, res, next) => bookController.deleteBook(req, res, next)
   );
   router.get('/', authHandlerMiddleware(), (req, res, next) =>
     bookController.getAllBooks(req, res, next)

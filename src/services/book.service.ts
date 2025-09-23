@@ -1,59 +1,84 @@
-import jwt from 'jsonwebtoken';
-
-import * as bcrypt from 'bcryptjs';
-
-import { UserRepository } from '../repositories/user.repository';
-import UnauthorizedError from '../errors/custom/unauthorized.error.class';
+import { BookRepository } from '../repositories/book.repository';
 import ConflictError from '../errors/custom/conflict.error.class';
 import logger from '../helpers/logger';
+import { Prisma } from '../generated/prisma';
 import { PrismaClientKnownRequestError } from '../generated/prisma/runtime/library';
-import { EXPIRE, JWT, PEPPER, SALT } from '../constants/secrets';
-import { CreateUserDto, LoginDto } from '../schemas/user.schema';
+import NotFound from '../errors/custom/notfound.error.class';
 
-//TODO: Probably should create an AuthService separate from UserService
-export class UserService {
-  constructor(private userRepo: UserRepository) {}
-  async createUser(dto: CreateUserDto) {
+export class BookService {
+  constructor(private bookRepo: BookRepository) {}
+
+  /**
+   * Creates a new book record.
+   * @param data The data for the new book.
+   * @returns The newly created book object.
+   * @throws {ConflictError} if a book with the same ISBN already exists.
+   */
+  async createBook(data: Prisma.BookCreateInput) {
     try {
-      const { password } = dto;
-      const hashedPassword = await this.hashPassword(password);
-      const user = await this.userRepo.create({
-        ...dto,
-        password: hashedPassword,
-      });
-      return user;
+      return await this.bookRepo.create(data);
     } catch (err) {
-      logger.error({ name: UserService.name, err });
-      //P2002 is unique constraint error in prisma
-      if (err instanceof PrismaClientKnownRequestError && err.code == 'P2002')
-        err = new ConflictError('email already exists');
+      logger.error({ name: BookService.name, err });
+      if (
+        err instanceof PrismaClientKnownRequestError &&
+        err.code === 'P2002'
+      ) {
+        throw new ConflictError('A book with this ISBN already exists.');
+      }
       throw err;
     }
   }
-  async hashPassword(password: string) {
-    const salt = await bcrypt.genSalt(Number(SALT));
-    return bcrypt.hash(password + PEPPER, salt);
-  }
-  private generateToken(id: number) {
-    return jwt.sign({ id }, `${JWT}`, {
-      expiresIn: `${EXPIRE}`,
-    });
-  }
-  private async comparePasword(hashedPassword: string, password: string) {
-    return bcrypt.compare(password + PEPPER, hashedPassword);
-  }
-  async authenticate(dto: LoginDto) {
-    const user = await this.userRepo.findByEmail(dto.email);
-    if (!user) throw new UnauthorizedError('invalid email or password'); //This error will be caught in the controller anyways and handled accordingly
 
-    const isAuthenticated = await this.comparePasword(
-      user.password,
-      dto.password
-    );
-    if (!isAuthenticated) {
-      throw new UnauthorizedError('invalid email or password');
+  /**
+   * Finds a book by its unique ID.
+   * @param id The ID of the book to find.
+   * @returns The book object or null if not found.
+   */
+  async findBookById(id: number) {
+    const book = await this.bookRepo.findById(id);
+    if (!book) throw new NotFound("This book doesn't exist");
+    return book;
+  }
+
+  /**
+   * Finds all books, with optional search filtering.
+   * @param searchString An optional string to filter books by title, author, or ISBN.
+   * @returns An array of book objects.
+   */
+  async findAllBooks(searchString?: string) {
+    return this.bookRepo.findAll(searchString);
+  }
+
+  /**
+   * Updates an existing book record.
+   * @param id The ID of the book to update.
+   * @param data The data to update.
+   * @returns The updated book object.
+   * @throws {ConflictError} if the updated ISBN already exists for another book.
+   */
+  async updateBook(id: number, data: Prisma.BookCreateInput) {
+    try {
+      return await this.bookRepo.update(id, data);
+    } catch (err) {
+      logger.error({ name: BookService.name, err });
+      if (
+        err instanceof PrismaClientKnownRequestError &&
+        err.code === 'P2002'
+      ) {
+        throw new ConflictError('A book with this ISBN already exists.');
+      }
+      throw err;
     }
-    const token = this.generateToken(user.id);
-    return token;
+  }
+
+  /**
+   * Deletes a book record by its unique ID.
+   * @param id The ID of the book to delete.
+   * @returns The deleted book object.
+   */
+  async deleteBook(id: number) {
+    const book = await this.bookRepo.delete(id);
+    if (!book) throw new NotFound("This book doesn't exist");
+    return book;
   }
 }

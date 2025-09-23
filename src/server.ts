@@ -19,6 +19,8 @@ import { UserRepository } from './repositories/user.repository';
 import { UserService } from './services/user.service';
 import bookRoutes from './api/routes/api/v1/book.route';
 import { BookController } from './api/controllers/book.controller';
+import { BookRepository } from './repositories/book.repository';
+import { BookService } from './services/book.service';
 dotenv.config();
 const { PORT, HOST } = process.env;
 const app = express();
@@ -60,7 +62,9 @@ const start = async () => {
     const userRepository = new UserRepository(prisma);
     const userService = new UserService(userRepository);
     const authController = new AuthController(userService);
-    const bookController = new BookController();
+    const bookRepository = new BookRepository(prisma);
+    const bookService = new BookService(bookRepository);
+    const bookController = new BookController(bookService);
 
     /*Router */
     const router = express.Router();

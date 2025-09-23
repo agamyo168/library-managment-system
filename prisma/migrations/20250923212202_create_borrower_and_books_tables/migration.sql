@@ -18,7 +18,7 @@ CREATE TABLE "public"."books" (
     "author" TEXT NOT NULL,
     "isbn" TEXT NOT NULL,
     "quantity" INTEGER NOT NULL,
-    "shelf_loction" TEXT NOT NULL,
+    "shelf_location" TEXT NOT NULL,
 
     CONSTRAINT "books_pkey" PRIMARY KEY ("id")
 );

@@ -56,7 +56,7 @@
     "docker": "docker compose up",
     "start": "node --env-file=.env dist/server.js",
     "format": "prettier --config ./.prettierrc --write \"src/**/*.{ts,js}\"",
-    "migrate:deploy": "npx prisma deploy",
+    "migrate:deploy": "npx prisma migrate deploy",
     "generate": "npx prisma generate",
     "migrate:dev": "npx prisma migrate dev",
     "prisma:format": "npx prisma format",

@@ -7,7 +7,9 @@ const bookSchema: ObjectSchema = Joi.object({
   quantity: Joi.number().integer().required(),
   shelfLocation: Joi.string().required(),
 });
-
+const bookIdSchema = Joi.object({
+  id: Joi.number().integer().min(1).required(),
+});
 interface CreateBookDto {
   title: string;
   author: string;
@@ -15,4 +17,10 @@ interface CreateBookDto {
   quantity: number;
   shelfLocation: string;
 }
-export { bookSchema, CreateBookDto };
+interface BookParams {
+  id: number;
+}
+interface GetBookQuery {
+  search: string;
+}
+export { bookSchema, bookIdSchema, CreateBookDto, GetBookQuery, BookParams };
