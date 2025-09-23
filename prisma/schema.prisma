@@ -34,7 +34,7 @@ model Book {
   title          String
   author         String
   isbn           String             @unique
-  quantity       Int
+  quantity       Int                @default(1) //At least one book if not specified
   shelf_loction  String
   borrowed_books BorrowingProcess[]
 

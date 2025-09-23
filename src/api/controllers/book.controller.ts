@@ -5,7 +5,6 @@ import { StatusCodes } from 'http-status-codes';
 export class BookController {
   constructor() {}
 
-  //Weirdly enough this should be an admin endpoint
   async addBook(req: Request, res: Response, next: NextFunction) {
     try {
       //Get book body

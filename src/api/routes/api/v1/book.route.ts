@@ -1,23 +1,22 @@
 import { Router } from 'express';
 import { validateBodyMiddleware } from '../../../../middlewares/validation.middleware';
-import { signInSchema, userSchema } from '../../../../schemas/user.schema';
 import { BookController } from '../../../controllers/book.controller';
 import authHandlerMiddleware from '../../../../middlewares/auth-handler.middleware';
+import { bookSchema } from '../../../../schemas/book.schema';
 
-// This function receives the controller instance
 export default function bookRoutes(bookController: BookController): Router {
   const router = Router();
 
   router.post(
     '/',
     authHandlerMiddleware(), //Should be admin role
-    validateBodyMiddleware(userSchema),
+    validateBodyMiddleware(bookSchema),
     (req, res, next) => bookController.addBook(req, res, next)
   );
   router.put(
     '/:id',
     authHandlerMiddleware(),
-    validateBodyMiddleware(signInSchema),
+    validateBodyMiddleware(bookSchema), //Same as create because we are using a put endpoint --- doesn't necessary have to create a resource js
     (req, res, next) => bookController.updateBook(req, res, next)
   );
   router.delete('/:id', authHandlerMiddleware(), (req, res, next) =>
