@@ -1,10 +1,9 @@
 import express from 'express';
 import { StatusCodes } from 'http-status-codes';
-import swaggerUi from 'swagger-ui-express';
+// import swaggerUi from 'swagger-ui-express';
 import dotenv from 'dotenv';
 import notFoundMiddleware from './middlewares/notfound.middleware';
 import logger from './helpers/logger';
-import routes from './api/routes/api/v1';
 import errorHandlerMiddleware from './middlewares/error-handler.middleware';
 import helmet from 'helmet';
 // import swaggerDocument from './configs/swagger.config';

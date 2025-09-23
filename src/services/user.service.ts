@@ -32,10 +32,14 @@ export class UserService {
   }
   async createUser(userParams: UserParams) {
     try {
-      const user = await this.userRepo.create(userParams);
+      const hashedPassword = await this.hashPassword(userParams.password);
+      const user = await this.userRepo.create({
+        ...userParams,
+        password: hashedPassword,
+      });
       return user;
     } catch (err) {
-      logger.error(err);
+      logger.error({ name: UserService.name, err });
       //P2002 is unique constraint error in prisma
       if (err instanceof PrismaClientKnownRequestError && err.code == 'P2002')
         err = new ConflictError('email already exists');

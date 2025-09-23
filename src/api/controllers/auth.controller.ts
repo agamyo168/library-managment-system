@@ -12,7 +12,7 @@ export class AuthController {
   async signup(req: Request, res: Response, next: NextFunction) {
     try {
       // The controller passes the request data to the service
-      logger.info({ name: AuthController.name, body: { ...req.body } });
+      // logger.info({ name: AuthController.name, body: { ...req.body } });
       await this.userService.createUser(req.body);
       res.status(StatusCodes.CREATED).json({
         success: true,
