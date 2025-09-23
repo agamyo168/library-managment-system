@@ -11,7 +11,10 @@ import cors from 'cors';
 import { PrismaClient } from './generated/prisma';
 import { AuthController } from './api/controllers/auth.controller';
 import authRoutes from './api/routes/api/v1/auth.route';
-import { loginRateLimiter } from './middlewares/rate-limiter.middleware';
+import {
+  loginRateLimiter,
+  rateLimiter,
+} from './middlewares/rate-limiter.middleware';
 import { UserRepository } from './repositories/user.repository';
 import { UserService } from './services/user.service';
 dotenv.config();
@@ -50,14 +53,15 @@ const start = async () => {
   try {
     await prisma.$connect();
     logger.info('DB Connected');
+    //Dependency Injection
     const userRepository = new UserRepository(prisma);
     const userService = new UserService(userRepository);
     const authController = new AuthController(userService);
 
     //Router
     const router = express.Router();
-    router.use(loginRateLimiter);
-    router.use('/auth', authRoutes(authController));
+    router.use(rateLimiter);
+    router.use('/auth', loginRateLimiter, authRoutes(authController));
     app.use('/api/v1/', router);
 
     // End of express middlewares stack

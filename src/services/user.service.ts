@@ -2,24 +2,13 @@ import jwt from 'jsonwebtoken';
 
 import { LoginParams, UserParams } from '../types/users/user.interface';
 import * as bcrypt from 'bcryptjs';
-import dotenv from 'dotenv';
 
-import { PrismaClient } from '@prisma/client';
-import BadRequestError from '../errors/custom/bad.request.error.class';
 import { UserRepository } from '../repositories/user.repository';
 import UnauthorizedError from '../errors/custom/unauthorized.error.class';
 import ConflictError from '../errors/custom/conflict.error.class';
 import logger from '../helpers/logger';
 import { PrismaClientKnownRequestError } from '../generated/prisma/runtime/library';
-
-dotenv.config();
-
-const {
-  JWT_SECRET: JWT,
-  JWT_EXPIRE: EXPIRE,
-  BCRYPT_SALT_ROUNDS,
-  BCRYPT_SECRET_PEPPER,
-} = process.env;
+import { EXPIRE, JWT, PEPPER, SALT } from '../constants/secrets';
 
 export class UserService {
   constructor(private userRepo: UserRepository) {}
@@ -41,8 +30,8 @@ export class UserService {
     }
   }
   async hashPassword(password: string) {
-    const salt = await bcrypt.genSalt(Number(BCRYPT_SALT_ROUNDS));
-    return bcrypt.hash(password + BCRYPT_SECRET_PEPPER, salt);
+    const salt = await bcrypt.genSalt(Number(SALT));
+    return bcrypt.hash(password + PEPPER, salt);
   }
   private generateToken(id: number) {
     return jwt.sign({ id }, `${JWT}`, {
@@ -50,7 +39,7 @@ export class UserService {
     });
   }
   private async comparePasword(hashedPassword: string, password: string) {
-    return bcrypt.compare(password + BCRYPT_SECRET_PEPPER, hashedPassword);
+    return bcrypt.compare(password + PEPPER, hashedPassword);
   }
   async authenticate(dto: LoginParams) {
     const user = await this.userRepo.findByEmail(dto.email);
