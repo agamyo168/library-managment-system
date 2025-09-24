@@ -1,7 +1,7 @@
 import { BookRepository } from '../repositories/book.repository';
 import ConflictError from '../errors/custom/conflict.error.class';
 import logger from '../helpers/logger';
-import { Prisma } from '../generated/prisma';
+import { Prisma, PrismaClient } from '../generated/prisma';
 import { PrismaClientKnownRequestError } from '../generated/prisma/runtime/library';
 import NotFound from '../errors/custom/notfound.error.class';
 
@@ -80,5 +80,8 @@ export class BookService {
     const book = await this.bookRepo.delete(id);
     if (!book) throw new NotFound("This book doesn't exist");
     return book;
+  }
+  withTransaction(prisma: PrismaClient) {
+    return new BookService(new BookRepository(prisma));
   }
 }

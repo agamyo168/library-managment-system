@@ -1,7 +1,8 @@
 import { Prisma, PrismaClient } from '../generated/prisma';
+import { PrismaTx } from '../types';
 
 export class BookRepository {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: PrismaClient | PrismaTx) {}
 
   /**
    * Finds a book by its unique ID.

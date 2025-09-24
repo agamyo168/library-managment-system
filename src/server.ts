@@ -1,7 +1,6 @@
 import express from 'express';
 import { StatusCodes } from 'http-status-codes';
 // import swaggerUi from 'swagger-ui-express';
-import dotenv from 'dotenv';
 import notFoundMiddleware from './middlewares/notfound.middleware';
 import logger from './helpers/logger';
 import errorHandlerMiddleware from './middlewares/error-handler.middleware';
@@ -24,8 +23,12 @@ import { BookService } from './services/book.service';
 import { AuthService } from './services/auth.service';
 import { UserController } from './api/controllers/user.controller';
 import userRoutes from './api/routes/api/v1/user.route';
-dotenv.config();
-const { PORT, HOST } = process.env;
+import { HOST, PORT } from './constants/secrets';
+import borrowingRoute from './api/routes/api/v1/borrowing.route';
+import { BorrowingController } from './api/controllers/borrowing.controller';
+import { BorrowingRepository } from './repositories/borrowing.repository';
+import { BorrowingService } from './services/borrowing.service';
+
 const app = express();
 const port = PORT || 3000;
 
@@ -68,9 +71,14 @@ const start = async () => {
 
     const authService = new AuthService(userRepository);
     const authController = new AuthController(authService);
+
     const bookRepository = new BookRepository(prisma);
     const bookService = new BookService(bookRepository);
     const bookController = new BookController(bookService);
+
+    const borrowingRepository = new BorrowingRepository(prisma);
+    const borrowingService = new BorrowingService(borrowingRepository, prisma);
+    const borrowingController = new BorrowingController(borrowingService);
 
     /*Router */
     const router = express.Router();
@@ -78,6 +86,8 @@ const start = async () => {
     router.use('/auth', loginRateLimiter, authRoutes(authController));
     router.use('/users', userRoutes(userController));
     router.use('/books', bookRoutes(bookController));
+    router.use('/borrowings', borrowingRoute(borrowingController));
+
     app.use('/api/v1/', router);
 
     // End of express middlewares stack

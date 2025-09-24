@@ -58,7 +58,7 @@ model BorrowingProcess {
   book       Book      @relation(fields: [bookId], references: [id])
   borrower   User      @relation(fields: [borrowerId], references: [id])
 
-  @@index([bookId, borrowerId]) // Composite index for efficient lookups
+  @@unique([bookId, borrowerId], name: "borrowingProcessKey") // Composite index for efficient lookups
   @@index([dueDate]) // Index for listing overdue books
   @@map("borrowing_process")
 }

@@ -6,7 +6,7 @@ import {
 import authHandlerMiddleware from '../../../../middlewares/auth-handler.middleware';
 import { UserController } from '../../../controllers/user.controller';
 import { paramIdSchema } from '../../../../schemas/schema';
-import { userSchema } from '../../../../schemas/user.schema';
+import { updateSchema } from '../../../../schemas/user.schema';
 
 export default function userRoutes(userController: UserController): Router {
   const router = Router();
@@ -15,7 +15,7 @@ export default function userRoutes(userController: UserController): Router {
     //Probably should use PATCH and allow any changes
     '/:id',
     authHandlerMiddleware(),
-    validateBodyMiddleware(userSchema),
+    validateBodyMiddleware(updateSchema),
     validateParamsMiddleware(paramIdSchema),
     (req, res, next) => userController.update(req, res, next)
   );
