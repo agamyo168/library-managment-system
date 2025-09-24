@@ -16,6 +16,12 @@ export class BorrowingRepository {
       },
     });
   }
+  async returnBook(id: number, borrowerId: number) {
+    return this.prisma.borrowingProcess.updateMany({
+      where: { id, borrowerId, returnDate: null },
+      data: { returnDate: new Date() },
+    });
+  }
   //fetches all borrowed books and not returned yet
   async fetchAllBorrowedBooks() {
     return this.prisma.borrowingProcess.findMany({
@@ -27,6 +33,25 @@ export class BorrowingRepository {
     return this.prisma.borrowingProcess.findMany({
       where: { borrowerId, returnDate: null },
       include: { book: true },
+    });
+  }
+  async fetchBorrowerPastDueDates() {
+    return this.prisma.borrowingProcess.findMany({
+      where: { returnDate: null, dueDate: { lte: new Date() } },
+      include: { book: true, borrower: true },
+    });
+  }
+  async fetchBorrowingById(borrwingId: number) {
+    return this.prisma.borrowingProcess.findUnique({
+      where: { id: borrwingId },
+    });
+  }
+  async fetchBorrowingByBorrowerIdAndBookId(
+    borrowerId: number,
+    bookId: number
+  ) {
+    return this.prisma.borrowingProcess.findMany({
+      where: { borrowerId, bookId },
     });
   }
   withTransaction(prisma: PrismaClient) {

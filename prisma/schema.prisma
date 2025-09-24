@@ -47,18 +47,17 @@ model Book {
   @@map("books")
 }
 
-//Can either be Borrowing Audit OR just many to many relationship to show books being borrowed currently.
 model BorrowingProcess {
   id         Int       @id @default(autoincrement())
   borrowerId Int       @map("borrower_id")
   bookId     Int       @map("book_id")
-  dueDate    DateTime  @map("due_date") //time to return
-  returnDate DateTime? @map("return_date") //return date is null until book is returned
+  dueDate    DateTime  @map("due_date") 
+  returnDate DateTime? @map("return_date") 
   //Relationships
   book       Book      @relation(fields: [bookId], references: [id])
   borrower   User      @relation(fields: [borrowerId], references: [id])
 
-  @@unique([bookId, borrowerId], name: "borrowingProcessKey") // Composite index for efficient lookups
-  @@index([dueDate]) // Index for listing overdue books
+  @@index([bookId, borrowerId])
+  @@index([dueDate]) 
   @@map("borrowing_process")
 }

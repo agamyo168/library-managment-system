@@ -56,7 +56,7 @@ export class BookService {
    * @returns The updated book object.
    * @throws {ConflictError} if the updated ISBN already exists for another book.
    */
-  async updateBook(id: number, data: Prisma.BookCreateInput) {
+  async updateBook(id: number, data: Partial<Prisma.BookCreateInput>) {
     try {
       return await this.bookRepo.update(id, data);
     } catch (err) {
@@ -69,6 +69,15 @@ export class BookService {
       }
       throw err;
     }
+  }
+  /**
+   * Updates an existing book quantity.
+   * @param id The ID of the book to update.
+   * @param increment the amount to increment/decrement.
+   * @returns The updated book object.
+   */
+  async changeBookQuantity(id: number, increment: number) {
+    return await this.bookRepo.changeBookQuantity(id, increment);
   }
 
   /**

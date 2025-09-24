@@ -13,13 +13,27 @@ export class BorrowingController {
       const {
         payload: { id: userId },
       } = res.locals;
-      logger.info(res.locals);
       data.borrowerId = +userId;
       data.bookId = +data.bookId;
       await this.borrowingService.checkout(data);
       res.status(StatusCodes.OK).json({
         success: true,
         message: 'Book was borrowed successfully!',
+      });
+    } catch (err) {
+      return next(err);
+    }
+  }
+  async return(req: Request<any>, res: Response, next: NextFunction) {
+    try {
+      const { id }: { id: number } = req.params;
+      const {
+        payload: { id: userId },
+      } = res.locals;
+      await this.borrowingService.returnBook(+id, +userId);
+      res.status(StatusCodes.OK).json({
+        success: true,
+        message: 'Book was returned successfully!',
       });
     } catch (err) {
       return next(err);

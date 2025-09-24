@@ -38,7 +38,20 @@ export class BookRepository {
       data,
     });
   }
-
+  /**
+   * Updates an existing book quantity.
+   * @param id The ID of the book to update.
+   * @param increment the amount to increment/decrement.
+   * @returns The updated book object.
+   */
+  async changeBookQuantity(id: number, increment: number) {
+    return this.prisma.book.update({
+      where: { id },
+      data: {
+        quantity: { increment },
+      },
+    });
+  }
   /**
    * Deletes a book record by its ID.
    * @param id The ID of the book to delete.
