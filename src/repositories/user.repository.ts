@@ -14,7 +14,17 @@ export class UserRepository {
       where: { id },
     });
   }
-
+  /**
+   * Deletes a user by their unique id.
+   * @param id the ID of the user to find.
+   * @returns A promise that resolves to the user object, or null if no user is found.
+   */
+  async deleteById(id: number) {
+    return this.prisma.user.delete({
+      where: { id },
+      omit: { password: true, createdAt: true, updatedAt: true },
+    });
+  }
   /**
    * Finds a user by their unique email address.
    * @param email The email address of the user to find.
@@ -36,12 +46,27 @@ export class UserRepository {
       data,
     });
   }
+  /**
+   * Updates a user record in the database.
+   * @param data The data to update the user.
+   * @param id The id of the user.
+   * @returns A promise that resolves to the newly updated user object.
+   */
+  async update(data: Prisma.UserCreateInput, id: number) {
+    return this.prisma.user.update({
+      data,
+      where: { id },
+      omit: { password: true, createdAt: true, updatedAt: true },
+    });
+  }
 
   /**
    * Retrieves all user records from the database.
    * @returns A promise that resolves to an array of all user objects.
    */
   async findAll() {
-    return this.prisma.user.findMany();
+    return this.prisma.user.findMany({
+      omit: { password: true, createdAt: true, updatedAt: true },
+    });
   }
 }

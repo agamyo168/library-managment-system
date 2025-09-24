@@ -21,6 +21,9 @@ import bookRoutes from './api/routes/api/v1/book.route';
 import { BookController } from './api/controllers/book.controller';
 import { BookRepository } from './repositories/book.repository';
 import { BookService } from './services/book.service';
+import { AuthService } from './services/auth.service';
+import { UserController } from './api/controllers/user.controller';
+import userRoutes from './api/routes/api/v1/user.route';
 dotenv.config();
 const { PORT, HOST } = process.env;
 const app = express();
@@ -61,7 +64,10 @@ const start = async () => {
     //User - Auth
     const userRepository = new UserRepository(prisma);
     const userService = new UserService(userRepository);
-    const authController = new AuthController(userService);
+    const userController = new UserController(userService);
+
+    const authService = new AuthService(userRepository);
+    const authController = new AuthController(authService);
     const bookRepository = new BookRepository(prisma);
     const bookService = new BookService(bookRepository);
     const bookController = new BookController(bookService);
@@ -70,6 +76,7 @@ const start = async () => {
     const router = express.Router();
     router.use(rateLimiter); //Generate Rate limiter
     router.use('/auth', loginRateLimiter, authRoutes(authController));
+    router.use('/users', userRoutes(userController));
     router.use('/books', bookRoutes(bookController));
     app.use('/api/v1/', router);
 

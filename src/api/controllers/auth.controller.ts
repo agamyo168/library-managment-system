@@ -1,16 +1,15 @@
-// src/controllers/user.controller.ts
 import { NextFunction, Request, Response } from 'express';
-import { UserService } from '../../services/user.service';
 import { StatusCodes } from 'http-status-codes';
+import { AuthService } from '../../services/auth.service';
 
 export class AuthController {
-  constructor(private userService: UserService) {}
+  constructor(private authService: AuthService) {}
 
   async signup(req: Request, res: Response, next: NextFunction) {
     try {
       // The controller passes the request data to the service
       // logger.info({ name: AuthController.name, body: { ...req.body } });
-      await this.userService.createUser(req.body);
+      await this.authService.createUser(req.body);
       res.status(StatusCodes.CREATED).json({
         success: true,
         message: 'Account has been created successfully!',
@@ -25,7 +24,7 @@ export class AuthController {
       const { email, password } = req.body;
 
       //Authenticate email and password
-      const token = await this.userService.authenticate({ email, password });
+      const token = await this.authService.authenticate({ email, password });
       //return token
       res.status(StatusCodes.OK).json({
         success: true,

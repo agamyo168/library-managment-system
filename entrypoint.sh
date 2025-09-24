@@ -14,6 +14,7 @@
 
 # cp -r ./src/docs/ ./dist/docs/
 # node --env-file=.env.dev dist/server.js
+npm install
 npx prisma generate
 npx prisma migrate deploy
 npx nodemon src/server.ts

@@ -9,7 +9,7 @@ const userSchema: ObjectSchema = Joi.object({
   email: Joi.string().email().min(6).required(),
   password: Joi.string().min(8).required(),
 });
-interface CreateUserDto {
+interface UserDto {
   password: string;
   name: string;
   email: string;
@@ -19,4 +19,4 @@ interface LoginDto {
   email: string;
 }
 
-export { userSchema, signInSchema, CreateUserDto, LoginDto };
+export { userSchema, signInSchema, UserDto, LoginDto };
