@@ -16,9 +16,9 @@ export class BorrowingRepository {
       },
     });
   }
-  async returnBook(id: number, borrowerId: number) {
+  async returnBook(bookId: number, borrowerId: number) {
     return this.prisma.borrowingProcess.updateMany({
-      where: { id, borrowerId, returnDate: null },
+      where: { bookId, borrowerId, returnDate: null },
       data: { returnDate: new Date() },
     });
   }
@@ -46,12 +46,12 @@ export class BorrowingRepository {
       where: { id: borrwingId },
     });
   }
-  async fetchBorrowingByBorrowerIdAndBookId(
+  async fetchCurrentBorrowingByBorrowerIdAndBookId(
     borrowerId: number,
     bookId: number
   ) {
     return this.prisma.borrowingProcess.findMany({
-      where: { borrowerId, bookId },
+      where: { borrowerId, bookId, returnDate: null },
     });
   }
   withTransaction(prisma: PrismaClient) {

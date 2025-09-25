@@ -8,6 +8,7 @@ import ConflictError from '../errors/custom/conflict.error.class';
 import PrismaErrorCodes from '../constants/prisma-errors.constants';
 import { CheckoutParam } from '../schemas/borrowing.schema';
 import NotFound from '../errors/custom/notfound.error.class';
+import logger from '../helpers/logger';
 
 export class BorrowingService {
   constructor(
@@ -16,59 +17,40 @@ export class BorrowingService {
   ) {}
 
   async checkout(data: CheckoutParam) {
-    try {
-      await this.prisma.$transaction(async (tx) => {
-        const bookServiceTx = new BookService(new BookRepository(tx));
-        const borrowingRepoTx = new BorrowingRepository(tx);
-        const { bookId, borrowerId } = data;
-        const book = await bookServiceTx.findBookById(+bookId);
-        if (book.quantity < 1)
-          throw new BadRequestError('No available books to borrow');
+    await this.prisma.$transaction(async (tx) => {
+      const bookServiceTx = new BookService(new BookRepository(tx));
+      const borrowingRepoTx = new BorrowingRepository(tx);
+      const { bookId, borrowerId } = data;
+      const book = await bookServiceTx.findBookById(+bookId);
+      if (book.quantity < 1)
+        throw new BadRequestError('No available books to borrow');
 
-        await bookServiceTx.changeBookQuantity(bookId, -1);
-        const oldBorrowings =
-          await borrowingRepoTx.fetchBorrowingByBorrowerIdAndBookId(
-            borrowerId,
-            bookId
-          );
-        if (oldBorrowings)
-          throw new ConflictError('You already borrowed this book');
-        await borrowingRepoTx.checkoutBook(data);
-      });
-    } catch (err) {
-      if (
-        err instanceof PrismaClientKnownRequestError &&
-        err.code === PrismaErrorCodes.UNIQUE
-      )
-        err = new ConflictError('You already borrowed this book');
-      throw err;
-    }
-  }
-  async returnBook(borrowingId: number, borrowerId: number) {
-    try {
-      await this.prisma.$transaction(async (tx) => {
-        const bookServiceTx = new BookService(new BookRepository(tx));
-        const borrowingRepoTx = new BorrowingRepository(tx);
-        const { count } = await borrowingRepoTx.returnBook(
-          borrowingId,
-          borrowerId //-> I pass this as a security check
+      await bookServiceTx.changeBookQuantity(bookId, -1);
+      const oldBorrowings =
+        await borrowingRepoTx.fetchCurrentBorrowingByBorrowerIdAndBookId(
+          borrowerId,
+          bookId
         );
-        if (!count)
-          throw new NotFound(
-            'Book has already been returned or never borrowed'
-          );
-        const borrowing = await borrowingRepoTx.fetchBorrowingById(borrowingId);
-        if (!borrowing) throw new NotFound('');
-        await bookServiceTx.changeBookQuantity(borrowing.bookId, 1);
-      });
-    } catch (err) {
-      if (
-        err instanceof PrismaClientKnownRequestError &&
-        err.code === PrismaErrorCodes.UNIQUE
-      )
-        err = new ConflictError('You already borrowed this book');
-      throw err;
-    }
+      logger.info({ name: BorrowingService.name, oldBorrowings });
+      if (oldBorrowings.length > 0)
+        throw new ConflictError(
+          'You already are currently borrowing this book'
+        );
+      await borrowingRepoTx.checkoutBook(data);
+    });
+  }
+  async returnBook(bookId: number, borrowerId: number) {
+    await this.prisma.$transaction(async (tx) => {
+      const bookServiceTx = new BookService(new BookRepository(tx));
+      const borrowingRepoTx = new BorrowingRepository(tx);
+      const { count } = await borrowingRepoTx.returnBook(
+        bookId,
+        borrowerId //-> I pass this as a security check
+      );
+      if (!count)
+        throw new NotFound('Book has already been returned or never borrowed');
+      await bookServiceTx.changeBookQuantity(bookId, 1);
+    });
   }
 
   async fetchAllBorrowedBooks() {
@@ -76,5 +58,8 @@ export class BorrowingService {
   }
   async fetchUserBorrowedBooks(userId: number) {
     return this.borrowingRepo.fetchUserBorrowedBooks(userId);
+  }
+  async fetchDueDateBorrowedBooks() {
+    return this.borrowingRepo.fetchBorrowerPastDueDates();
   }
 }
