@@ -8,6 +8,8 @@ import { bookIdSchema, bookSchema } from '../../../../schemas/book.schema';
 import { BorrowingController } from '../../../controllers/borrowing.controller';
 import { checkoutBookIdSchema } from '../../../../schemas/borrowing.schema';
 import { paramIdSchema } from '../../../../schemas/schema';
+import { UserRoleEnum } from '../../../../constants/enums/roles';
+import asyncWrapper from '../../../../helpers/async-error-wrapper.helper';
 
 export default function borrowingRoute(
   borrowingController: BorrowingController
@@ -18,14 +20,30 @@ export default function borrowingRoute(
     '/checkout/:bookId',
     authHandlerMiddleware(),
     validateParamsMiddleware(checkoutBookIdSchema),
-    (req, res, next) => borrowingController.checkout(req, res, next)
+    asyncWrapper(borrowingController.checkout)
   );
   router.post(
     '/return/:id',
     authHandlerMiddleware(),
     validateParamsMiddleware(paramIdSchema),
-    (req, res, next) => borrowingController.return(req, res, next)
+    asyncWrapper(borrowingController.return)
   );
+  router.get(
+    'borrowed',
+    authHandlerMiddleware(),
+    asyncWrapper(borrowingController.fetchMyBorrowedBooks)
+  );
+
+  router
+    .use(
+      '/admin',
+      authHandlerMiddleware([UserRoleEnum.ADMIN]) // I think for such endpoints it's better to send back Not Found Error from a security POV
+    )
+    .get(
+      '',
+      asyncWrapper(borrowingController.fetchAllBorrowedBooksAndBorrowers)
+    )
+    .get('due-dates', asyncWrapper(borrowingController.fetchPastDueDateBooks));
 
   return router;
 }
