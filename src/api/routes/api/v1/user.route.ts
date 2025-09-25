@@ -8,6 +8,7 @@ import { UserController } from '../../../controllers/user.controller';
 import { paramIdSchema } from '../../../../schemas/schema';
 import { updateSchema } from '../../../../schemas/user.schema';
 import { UserRoleEnum } from '../../../../constants/enums/roles';
+import asyncWrapper from '../../../../helpers/async-error-wrapper.helper';
 
 export default function userRoutes(userController: UserController): Router {
   const router = Router();
@@ -16,22 +17,22 @@ export default function userRoutes(userController: UserController): Router {
   router.put(
     '/:id',
     authHandlerMiddleware([UserRoleEnum.ADMIN]),
-    validateBodyMiddleware(updateSchema),
+    validateBodyMiddleware(updateSchema), //Validation probably could be shortened into just one method with object keys as input
     validateParamsMiddleware(paramIdSchema),
-    (req, res, next) => userController.update(req, res, next)
+    asyncWrapper(userController.update)
   );
   //Should be Admin only
   router.delete(
     '/:id',
     authHandlerMiddleware([UserRoleEnum.ADMIN]),
     validateParamsMiddleware(paramIdSchema),
-    (req, res, next) => userController.delete(req, res, next)
+    asyncWrapper(userController.delete)
   );
   //Should be Admin only
   router.get(
     '/',
     authHandlerMiddleware([UserRoleEnum.ADMIN]),
-    (req, res, next) => userController.findAll(req, res, next)
+    asyncWrapper(userController.findAll)
   );
 
   return router;

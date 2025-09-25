@@ -54,12 +54,29 @@ export class BorrowingService {
   }
 
   async fetchAllBorrowedBooks() {
-    return this.borrowingRepo.fetchAllBorrowedBooks();
+    const borrowings = await this.borrowingRepo.fetchAllBorrowedBooks();
+    //Could be done in SQL I guess but this is just ok
+    return borrowings.map((borrowing) => ({
+      ...borrowing.book,
+      borrowedBy: {
+        name: borrowing.borrower.name,
+        email: borrowing.borrower.email,
+      },
+    }));
   }
   async fetchUserBorrowedBooks(userId: number) {
-    return this.borrowingRepo.fetchUserBorrowedBooks(userId);
+    const borrowings = await this.borrowingRepo.fetchUserBorrowedBooks(userId);
+    return borrowings.map((borrowing) => ({
+      ...borrowing.book,
+      dueDate: borrowing.dueDate,
+    }));
   }
   async fetchDueDateBorrowedBooks() {
-    return this.borrowingRepo.fetchBorrowerPastDueDates();
+    const borrowings = await this.borrowingRepo.fetchBorrowerPastDueDates();
+    //Could refactor these maps later
+    return borrowings.map((borrowing) => ({
+      ...borrowing.book,
+      dueDate: borrowing.dueDate,
+    }));
   }
 }

@@ -13,17 +13,9 @@ import { Prisma } from '../generated/prisma';
 export class UserService {
   constructor(private userRepo: UserRepository) {}
   async createUser(dto: UserDto) {
-    try {
-      dto.password = await this.hashPassword(dto.password);
-      const user = await this.userRepo.create(dto);
-      return user;
-    } catch (err) {
-      logger.error({ name: UserService.name, err });
-      //P2002 is unique constraint error in prisma
-      if (err instanceof PrismaClientKnownRequestError && err.code == 'P2002')
-        err = new ConflictError('email already exists');
-      throw err;
-    }
+    dto.password = await this.hashPassword(dto.password);
+    const user = await this.userRepo.create(dto);
+    return user;
   }
   async findAll() {
     return this.userRepo.findAll();
@@ -35,20 +27,13 @@ export class UserService {
     return this.userRepo.findById(id);
   }
   async update(dto: Prisma.UserUpdateInput, id: number) {
-    try {
-      //When updating password hash the new one
-      if (dto.password && typeof dto.password === 'string')
-        dto.password = await this.hashPassword(dto.password);
+    //When updating password hash the new one
+    if (dto.password && typeof dto.password === 'string')
+      dto.password = await this.hashPassword(dto.password);
 
-      const user = await this.userRepo.update(dto, id);
-      if (!user) throw new NotFound('User not found');
-      return user;
-    } catch (err) {
-      logger.error({ name: UserService.name, err });
-      if (err instanceof PrismaClientKnownRequestError && err.code == 'P2002')
-        err = new ConflictError('email already exists');
-      throw err;
-    }
+    const user = await this.userRepo.update(dto, id);
+    if (!user) throw new NotFound('User not found');
+    return user;
   }
   async delete(id: number) {
     const user = await this.userRepo.deleteById(id);

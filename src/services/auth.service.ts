@@ -40,7 +40,6 @@ export class AuthService {
       expiresIn: `${EXPIRE}`,
     });
   }
-
   private async comparePasword(hashedPassword: string, password: string) {
     return bcrypt.compare(password + PEPPER, hashedPassword);
   }

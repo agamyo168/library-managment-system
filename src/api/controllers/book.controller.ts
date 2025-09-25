@@ -16,17 +16,13 @@ export class BookController {
     res: Response,
     next: NextFunction
   ) {
-    try {
-      const bookData = req.body;
-      const newBook = await this.bookService.createBook(bookData);
-      res.status(StatusCodes.CREATED).json({
-        success: true,
-        message: 'Book has been added successfully!',
-        data: newBook,
-      });
-    } catch (err) {
-      return next(err);
-    }
+    const bookData = req.body;
+    const newBook = await this.bookService.createBook(bookData);
+    res.status(StatusCodes.CREATED).json({
+      success: true,
+      message: 'Book has been added successfully!',
+      data: newBook,
+    });
   }
 
   async updateBook(
@@ -34,35 +30,24 @@ export class BookController {
     res: Response,
     next: NextFunction
   ) {
-    try {
-      const { id }: BookParams = req.params;
-      const bookData = req.body;
-      const updatedBook = await this.bookService.updateBook(
-        Number(id),
-        bookData
-      );
-      res.status(StatusCodes.OK).json({
-        success: true,
-        message: 'Book has been updated successfully!',
-        data: updatedBook,
-      });
-    } catch (err) {
-      return next(err);
-    }
+    const { id }: BookParams = req.params;
+    const bookData = req.body;
+    const updatedBook = await this.bookService.updateBook(Number(id), bookData);
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Book has been updated successfully!',
+      data: updatedBook,
+    });
   }
 
   async deleteBook(req: Request<any>, res: Response, next: NextFunction) {
-    try {
-      const { id }: BookParams = req.params;
-      const deletedBook = await this.bookService.deleteBook(Number(id));
-      res.status(StatusCodes.OK).json({
-        success: true,
-        message: 'Book has been deleted successfully!',
-        data: deletedBook,
-      });
-    } catch (err) {
-      return next(err);
-    }
+    const { id }: BookParams = req.params;
+    const deletedBook = await this.bookService.deleteBook(Number(id));
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Book has been deleted successfully!',
+      data: deletedBook,
+    });
   }
 
   async getAllBooks(
@@ -70,15 +55,11 @@ export class BookController {
     res: Response,
     next: NextFunction
   ) {
-    try {
-      const { search }: GetBookQuery = req.query;
-      const books = await this.bookService.findAllBooks(search);
-      res.status(StatusCodes.OK).json({
-        success: true,
-        data: books,
-      });
-    } catch (err) {
-      return next(err);
-    }
+    const { search }: GetBookQuery = req.query;
+    const books = await this.bookService.findAllBooks(search);
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: books,
+    });
   }
 }
