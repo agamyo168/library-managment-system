@@ -9,7 +9,7 @@ export class AuthController {
     try {
       // The controller passes the request data to the service
       // logger.info({ name: AuthController.name, body: { ...req.body } });
-      await this.authService.createUser(req.body);
+      await this.authService.register(req.body);
       res.status(StatusCodes.CREATED).json({
         success: true,
         message: 'Account has been created successfully!',

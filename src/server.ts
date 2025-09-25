@@ -64,12 +64,11 @@ const start = async () => {
     await prisma.$connect();
     logger.info('DB Connected');
     /*Dependency Injections */
-    //User - Auth
     const userRepository = new UserRepository(prisma);
     const userService = new UserService(userRepository);
     const userController = new UserController(userService);
 
-    const authService = new AuthService(userRepository);
+    const authService = new AuthService(userService);
     const authController = new AuthController(authService);
 
     const bookRepository = new BookRepository(prisma);

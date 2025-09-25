@@ -7,14 +7,15 @@ import authHandlerMiddleware from '../../../../middlewares/auth-handler.middlewa
 import { UserController } from '../../../controllers/user.controller';
 import { paramIdSchema } from '../../../../schemas/schema';
 import { updateSchema } from '../../../../schemas/user.schema';
+import { UserRoleEnum } from '../../../../constants/enums/roles';
 
 export default function userRoutes(userController: UserController): Router {
   const router = Router();
-
+  //User endpoint to update their personal Information.
+  // router.patch('me')
   router.put(
-    //Probably should use PATCH and allow any changes
     '/:id',
-    authHandlerMiddleware(),
+    authHandlerMiddleware([UserRoleEnum.ADMIN]),
     validateBodyMiddleware(updateSchema),
     validateParamsMiddleware(paramIdSchema),
     (req, res, next) => userController.update(req, res, next)
@@ -22,13 +23,15 @@ export default function userRoutes(userController: UserController): Router {
   //Should be Admin only
   router.delete(
     '/:id',
-    authHandlerMiddleware(),
+    authHandlerMiddleware([UserRoleEnum.ADMIN]),
     validateParamsMiddleware(paramIdSchema),
     (req, res, next) => userController.delete(req, res, next)
   );
   //Should be Admin only
-  router.get('/', authHandlerMiddleware(), (req, res, next) =>
-    userController.findAll(req, res, next)
+  router.get(
+    '/',
+    authHandlerMiddleware([UserRoleEnum.ADMIN]),
+    (req, res, next) => userController.findAll(req, res, next)
   );
 
   return router;

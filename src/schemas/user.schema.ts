@@ -27,6 +27,10 @@ interface LoginDto {
   password: string;
   email: string;
 }
+interface ChangePasswordDto {
+  oldPassword: string;
+  newPassword: string;
+}
 
 export {
   userSchema,
@@ -34,5 +38,6 @@ export {
   signInSchema,
   UserDto,
   UpdateUserDto,
+  ChangePasswordDto,
   LoginDto,
 };

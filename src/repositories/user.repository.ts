@@ -52,7 +52,7 @@ export class UserRepository {
    * @param id The id of the user.
    * @returns A promise that resolves to the newly updated user object.
    */
-  async update(data: Prisma.UserCreateInput, id: number) {
+  async update(data: Prisma.UserUpdateInput, id: number) {
     return this.prisma.user.update({
       data,
       where: { id },

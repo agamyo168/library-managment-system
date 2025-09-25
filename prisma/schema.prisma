@@ -17,13 +17,13 @@ datasource db {
 
 // Borrower
 model User {
-  id            Int                @id @default(autoincrement())
-  name          String
-  email         String             @unique
-  password      String
-  // role String //No need for Admin and Borrower role
-  createdAt    DateTime           @default(now()) @map("created_at") //registered date 
-  updatedAt    DateTime           @default(now()) @map("updated_at")
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("USER") 
+  createdAt DateTime @default(now()) @map("created_at")  //registered date 
+  updatedAt DateTime @map("updated_at") @updatedAt
 
   //Relationships
   borrowedBooks BorrowingProcess[]
@@ -32,13 +32,13 @@ model User {
 }
 
 model Book {
-  id            Int                @id @default(autoincrement())
+  id            Int    @id @default(autoincrement())
   title         String
   author        String
-  isbn          String             @unique
-  quantity      Int                @default(1) //At least one book if not specified
-  shelfLocation String             @map("shelf_location")
-  
+  isbn          String @unique
+  quantity      Int    @default(1) //At least one book if not specified
+  shelfLocation String @map("shelf_location")
+
   //Relationships
   borrowedBooks BorrowingProcess[]
 
@@ -51,13 +51,14 @@ model BorrowingProcess {
   id         Int       @id @default(autoincrement())
   borrowerId Int       @map("borrower_id")
   bookId     Int       @map("book_id")
-  dueDate    DateTime  @map("due_date") 
-  returnDate DateTime? @map("return_date") 
+  dueDate    DateTime  @map("due_date")
+  returnDate DateTime? @map("return_date")
+  createdAt  DateTime @default(now()) @map("created_at") 
   //Relationships
   book       Book      @relation(fields: [bookId], references: [id])
   borrower   User      @relation(fields: [borrowerId], references: [id])
 
   @@index([bookId, borrowerId])
-  @@index([dueDate]) 
+  @@index([dueDate])
   @@map("borrowing_process")
 }

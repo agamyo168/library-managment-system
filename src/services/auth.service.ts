@@ -2,48 +2,19 @@ import jwt from 'jsonwebtoken';
 
 import * as bcrypt from 'bcryptjs';
 
-import { UserRepository } from '../repositories/user.repository';
 import UnauthorizedError from '../errors/custom/unauthorized.error.class';
-import ConflictError from '../errors/custom/conflict.error.class';
-import logger from '../helpers/logger';
-import { EXPIRE, JWT, PEPPER, SALT } from '../constants/secrets';
-import { UserDto, LoginDto } from '../schemas/user.schema';
-import { PrismaClientKnownRequestError } from '../generated/prisma/runtime/library';
+import { EXPIRE, JWT, PEPPER } from '../constants/secrets';
+import { UserDto, LoginDto, ChangePasswordDto } from '../schemas/user.schema';
+import { UserService } from './user.service';
+import BadRequestError from '../errors/custom/bad.request.error.class';
 
 export class AuthService {
-  constructor(private userRepo: UserRepository) {}
-  /**
-   * Creates a new user record with a hashed password.
-   * @param dto The data transfer object containing user information.
-   * @returns A promise that resolves to the newly created user object.
-   * @throws {ConflictError} if a user with the provided email already exists.
-   */
-  async createUser(dto: UserDto) {
-    try {
-      const { password } = dto;
-      const hashedPassword = await this.hashPassword(password);
-      const user = await this.userRepo.create({
-        ...dto,
-        password: hashedPassword,
-      });
-      return user;
-    } catch (err) {
-      logger.error({ name: AuthService.name, err });
-      //P2002 is unique constraint error in prisma
-      if (err instanceof PrismaClientKnownRequestError && err.code == 'P2002')
-        err = new ConflictError('email already exists');
-      throw err;
-    }
+  constructor(private userService: UserService) {}
+  async register(dto: UserDto) {
+    return this.userService.createUser(dto);
   }
-
-  /**
-   * Authenticates a user by checking their email and password.
-   * @param dto The data transfer object containing login credentials.
-   * @returns A promise that resolves to a JWT token if authentication is successful.
-   * @throws {UnauthorizedError} if the email or password is invalid.
-   */
   async authenticate(dto: LoginDto) {
-    const user = await this.userRepo.findByEmail(dto.email);
+    const user = await this.userService.findByEmail(dto.email);
     if (!user) throw new UnauthorizedError('invalid email or password');
 
     const isAuthenticated = await this.comparePasword(
@@ -53,37 +24,23 @@ export class AuthService {
     if (!isAuthenticated) {
       throw new UnauthorizedError('invalid email or password');
     }
-    const token = this.generateToken(user.id);
+    const token = this.generateToken(user.id, user.role);
     return token;
   }
+  async changePassword(dto: ChangePasswordDto, id: number) {
+    const user = await this.userService.findById(id);
+    if (!user) throw new UnauthorizedError('User does not exist');
+    if (!(await this.comparePasword(user.password, dto.oldPassword)))
+      throw new BadRequestError('Wrong password');
 
-  /**
-   * Hashes a plain text password using bcrypt.
-   * @param password The password to hash.
-   * @returns A promise that resolves to the hashed password string.
-   */
-  private async hashPassword(password: string) {
-    const salt = await bcrypt.genSalt(Number(SALT));
-    return bcrypt.hash(password + PEPPER, salt);
+    await this.userService.update({ password: dto.newPassword }, id);
   }
-
-  /**
-   * Generates a JWT token for a user.
-   * @param id The ID of the user.
-   * @returns A JWT token string.
-   */
-  private generateToken(id: number) {
-    return jwt.sign({ id }, `${JWT}`, {
+  private generateToken(id: number, role: string) {
+    return jwt.sign({ id, role }, `${JWT}`, {
       expiresIn: `${EXPIRE}`,
     });
   }
 
-  /**
-   * Compares a plain text password with a hashed password.
-   * @param hashedPassword The hashed password from the database.
-   * @param password The plain text password to compare.
-   * @returns A promise that resolves to a boolean indicating if the passwords match.
-   */
   private async comparePasword(hashedPassword: string, password: string) {
     return bcrypt.compare(password + PEPPER, hashedPassword);
   }

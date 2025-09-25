@@ -15,13 +15,16 @@ const authHandlerMiddleware = (roles?: string[]) => {
         token,
         String(process.env.JWT_SECRET)
       ) as JwtPayload;
+      logger.info(
+        `roles: ${JSON.stringify(roles)}, user role: ${payload.role}`
+      );
       if (roles && roles.includes(payload.role) === false)
-        return next(new UnauthorizedError(`unauthorized access`));
+        return next(new UnauthorizedError(`Unauthorized access`));
       res.locals.payload = payload;
       next();
     } catch (err) {
       logger.error(err);
-      return next(new UnauthorizedError(`invalid user token`));
+      return next(new UnauthorizedError(`Invalid user token`));
     }
   };
 };
