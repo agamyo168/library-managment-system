@@ -7,7 +7,7 @@ import logger from '../../helpers/logger';
 
 export class BorrowingController {
   constructor(private borrowingService: BorrowingService) {}
-  async checkout(req: Request<any>, res: Response) {
+  public checkout = async (req: Request<any>, res: Response) => {
     const data: CheckoutParam = req.params;
     const {
       payload: { id: userId },
@@ -19,8 +19,12 @@ export class BorrowingController {
       success: true,
       message: 'Book was borrowed successfully!',
     });
-  }
-  async return(req: Request<any>, res: Response, next: NextFunction) {
+  };
+  public return = async (
+    req: Request<any>,
+    res: Response,
+    next: NextFunction
+  ) => {
     const { id }: { id: number } = req.params;
     const {
       payload: { id: userId },
@@ -30,12 +34,12 @@ export class BorrowingController {
       success: true,
       message: 'Book was returned successfully!',
     });
-  }
-  async fetchAllBorrowedBooksAndBorrowers(
+  };
+  public fetchAllBorrowedBooksAndBorrowers = async (
     req: Request<any>,
     res: Response,
     next: NextFunction
-  ) {
+  ) => {
     const data = await this.borrowingService.fetchAllBorrowedBooks();
 
     res.status(StatusCodes.OK).json({
@@ -43,12 +47,12 @@ export class BorrowingController {
       message: 'Borrowed books list was fetched successfully!',
       data,
     });
-  }
-  async fetchMyBorrowedBooks(
+  };
+  public fetchMyBorrowedBooks = async (
     req: Request<any>,
     res: Response,
     next: NextFunction
-  ) {
+  ) => {
     const { id }: { id: number } = res.locals.payload;
     const data = await this.borrowingService.fetchUserBorrowedBooks(+id);
     res.status(StatusCodes.OK).json({
@@ -56,17 +60,17 @@ export class BorrowingController {
       message: 'Borrowed books list was fetched successfully!',
       data,
     });
-  }
-  async fetchPastDueDateBooks(
+  };
+  public fetchPastDueDateBooks = async (
     req: Request<any>,
     res: Response,
     next: NextFunction
-  ) {
+  ) => {
     const data = await this.borrowingService.fetchDueDateBorrowedBooks();
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Due date borrowed books list was fetched successfully!',
       data,
     });
-  }
+  };
 }

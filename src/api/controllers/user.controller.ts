@@ -6,11 +6,11 @@ import logger from '../../helpers/logger';
 
 export class UserController {
   constructor(private userService: UserService) {}
-  async update(
+  public update = async (
     req: Request<any, unknown, UserDto>,
     res: Response,
     next: NextFunction
-  ) {
+  ) => {
     const { id }: { id: number } = req.params;
     const user = await this.userService.update(req.body, Number(id));
     res.status(StatusCodes.OK).json({
@@ -18,15 +18,19 @@ export class UserController {
       message: 'User has been updated successfully!',
       data: user,
     });
-  }
-  async findAll(_req: Request, res: Response, next: NextFunction) {
+  };
+  public findAll = async (_req: Request, res: Response, next: NextFunction) => {
     const users = await this.userService.findAll();
     res.status(StatusCodes.OK).json({
       success: true,
       data: users,
     });
-  }
-  async delete(req: Request<any>, res: Response, next: NextFunction) {
+  };
+  public delete = async (
+    req: Request<any>,
+    res: Response,
+    next: NextFunction
+  ) => {
     const { id }: { id: number } = req.params;
     const deletedUser = await this.userService.delete(id);
     res.status(StatusCodes.OK).json({
@@ -34,5 +38,5 @@ export class UserController {
       message: 'User has been deleted successfully!',
       data: deletedUser,
     });
-  }
+  };
 }

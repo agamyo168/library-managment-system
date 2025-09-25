@@ -5,7 +5,7 @@ import { AuthService } from '../../services/auth.service';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  async signup(req: Request, res: Response, next: NextFunction) {
+  public signup = async (req: Request, res: Response, next: NextFunction) => {
     // The controller passes the request data to the service
     // logger.info({ name: AuthController.name, body: { ...req.body } });
     await this.authService.register(req.body);
@@ -13,8 +13,8 @@ export class AuthController {
       success: true,
       message: 'Account has been created successfully!',
     });
-  }
-  async login(req: Request, res: Response, next: NextFunction) {
+  };
+  public login = async (req: Request, res: Response, next: NextFunction) => {
     //Get email and password --> Validated with JOI
     const { email, password } = req.body;
 
@@ -25,5 +25,5 @@ export class AuthController {
       success: true,
       data: token,
     });
-  }
+  };
 }

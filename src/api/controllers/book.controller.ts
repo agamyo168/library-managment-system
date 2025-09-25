@@ -11,11 +11,11 @@ import {
 export class BookController {
   constructor(private bookService: BookService) {}
 
-  async addBook(
+  public addBook = async (
     req: Request<unknown, unknown, CreateBookDto>,
     res: Response,
     next: NextFunction
-  ) {
+  ) => {
     const bookData = req.body;
     const newBook = await this.bookService.createBook(bookData);
     res.status(StatusCodes.CREATED).json({
@@ -23,13 +23,13 @@ export class BookController {
       message: 'Book has been added successfully!',
       data: newBook,
     });
-  }
+  };
 
-  async updateBook(
+  public updateBook = async (
     req: Request<any, unknown, CreateBookDto>,
     res: Response,
     next: NextFunction
-  ) {
+  ) => {
     const { id }: BookParams = req.params;
     const bookData = req.body;
     const updatedBook = await this.bookService.updateBook(Number(id), bookData);
@@ -38,9 +38,13 @@ export class BookController {
       message: 'Book has been updated successfully!',
       data: updatedBook,
     });
-  }
+  };
 
-  async deleteBook(req: Request<any>, res: Response, next: NextFunction) {
+  public deleteBook = async (
+    req: Request<any>,
+    res: Response,
+    next: NextFunction
+  ) => {
     const { id }: BookParams = req.params;
     const deletedBook = await this.bookService.deleteBook(Number(id));
     res.status(StatusCodes.OK).json({
@@ -48,18 +52,18 @@ export class BookController {
       message: 'Book has been deleted successfully!',
       data: deletedBook,
     });
-  }
+  };
 
-  async getAllBooks(
+  public getAllBooks = async (
     req: Request<unknown, unknown, unknown, any>,
     res: Response,
     next: NextFunction
-  ) {
+  ) => {
     const { search }: GetBookQuery = req.query;
     const books = await this.bookService.findAllBooks(search);
     res.status(StatusCodes.OK).json({
       success: true,
       data: books,
     });
-  }
+  };
 }
