@@ -29,21 +29,22 @@ export default function borrowingRoute(
     asyncWrapper(borrowingController.return)
   );
   router.get(
-    'borrowed',
+    '/',
     authHandlerMiddleware(),
     asyncWrapper(borrowingController.fetchMyBorrowedBooks)
   );
 
-  router
-    .use(
-      '/admin',
-      authHandlerMiddleware([UserRoleEnum.ADMIN]) // I think for such endpoints it's better to send back Not Found Error from a security POV
-    )
-    .get(
-      '',
-      asyncWrapper(borrowingController.fetchAllBorrowedBooksAndBorrowers)
-    )
-    .get('due-dates', asyncWrapper(borrowingController.fetchPastDueDateBooks));
+  //Should probably move this to a separate controller -> Admin or Dashboard controller probably
+  router.get(
+    '/admin',
+    authHandlerMiddleware([UserRoleEnum.ADMIN]), // I think for such endpoints it's better to send back Not Found Error from a security POV
+    asyncWrapper(borrowingController.fetchAllBorrowedBooksAndBorrowers)
+  );
+  router.get(
+    '/admin/due-dates',
+    authHandlerMiddleware([UserRoleEnum.ADMIN]),
+    asyncWrapper(borrowingController.fetchPastDueDateBooks)
+  );
 
   return router;
 }
