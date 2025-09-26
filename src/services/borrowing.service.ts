@@ -79,8 +79,8 @@ export class BorrowingService {
     }));
   }
 
-  async getBorrowingReports(fromDate?: string) {
-    return this.borrowingRepo.findBorrowingCountReports(fromDate);
+  async getBorrowingReports(fromDate?: string, toDate?: string) {
+    return this.borrowingRepo.findBorrowingCountReports(fromDate, toDate);
   }
 
   async fetchDueDateBorrowedBooks() {

@@ -64,14 +64,20 @@ export class BorrowingController {
     res: Response,
     next: NextFunction
   ) => {
-    let { download, fromDate } = req.query as any;
+    let { download, fromDate, toDate } = req.query as any;
     if (fromDate) {
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
       if (!dateRegex.test(fromDate)) {
         fromDate = undefined;
       }
+      if (!dateRegex.test(toDate)) {
+        toDate = undefined;
+      }
     }
-    const data = await this.borrowingService.getBorrowingReports(fromDate);
+    const data = await this.borrowingService.getBorrowingReports(
+      fromDate,
+      toDate
+    );
 
     if (download !== undefined) {
       res.setHeader('Content-Type', 'text/csv');

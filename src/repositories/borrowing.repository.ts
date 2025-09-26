@@ -61,11 +61,14 @@ export class BorrowingRepository {
       include: { book: true, borrower: true },
     });
   }
-  async findBorrowingCountReports(fromDate?: string) {
+  async findBorrowingCountReports(fromDate?: string, toDate?: string) {
     const whereClauses: Prisma.Sql[] = [];
     if (fromDate) {
       whereClauses.push(Prisma.sql`bp.created_at >= ${new Date(fromDate)}`);
     }
+    if (toDate)
+      whereClauses.push(Prisma.sql`bp.created_at <= ${new Date(toDate)}`);
+
     const where =
       whereClauses.length > 0
         ? Prisma.sql`WHERE ${Prisma.join(whereClauses, ' AND ')}`
@@ -85,6 +88,7 @@ export class BorrowingRepository {
       overDueCount: Number(data[0].overdue_counts),
     };
   }
+
   async findCurrentBorrowingByBorrowerIdAndBookId(
     borrowerId: number,
     bookId: number
