@@ -68,12 +68,10 @@ export class BookRepository {
    * @param searchString An optional string to filter books by title, author, or ISBN.
    * @returns A list of all book objects.
    */
-  async findAll(searchString?: string) {
-    if (!searchString) return this.prisma.book.findMany(); // If no search string is provided, return all books without filtering.
-
-    // If a search string is provided, construct a complex WHERE clause.
-    return this.prisma.book.findMany({
-      where: {
+  async findAll(searchString?: string, page: number = 1, limit: number = 10) {
+    let whereOptions: any = {};
+    if (searchString) {
+      whereOptions = {
         OR: [
           {
             title: {
@@ -94,7 +92,13 @@ export class BookRepository {
             },
           },
         ],
-      },
+      };
+    }
+    // If a search string is provided, construct a complex WHERE clause.
+    return this.prisma.book.findMany({
+      where: { ...whereOptions },
+      skip: (page - 1) * limit,
+      take: limit,
     });
   }
 }

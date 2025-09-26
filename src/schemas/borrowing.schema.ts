@@ -13,4 +13,5 @@ interface CheckoutParam {
 interface BorrowingDto {
   bookId: number;
 }
+
 export { CheckoutParam, BorrowingDto, checkoutBookIdSchema, borrowingSchema };

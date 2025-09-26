@@ -3,16 +3,16 @@ import { CheckoutParam } from '../schemas/borrowing.schema';
 import { PrismaTx } from '../types';
 export class BorrowingRepository {
   constructor(private prisma: PrismaClient | PrismaTx) {}
+
   async checkoutBook(data: CheckoutParam) {
     const { borrowerId, bookId } = data;
     const dueDate = new Date();
-    dueDate.setDate(dueDate.getDate() + 14); // CONSTANT because if we were to allow user input they would put indefinite time
+    dueDate.setDate(dueDate.getDate() + 14); // CONSTANT because if we were to allow user input they would put indefinite time -> Maybe make an ENUM with options?
     return this.prisma.borrowingProcess.create({
       data: {
         borrowerId,
         bookId,
         dueDate,
-        //return date is null by default.
       },
     });
   }
@@ -23,14 +23,26 @@ export class BorrowingRepository {
     });
   }
 
-  async findAllBorrowedBooks() {
+  async findAllBorrowedBooksIncludeBorrowers(
+    query: { status?: 'OVERDUE' },
+    page: number = 1,
+    limit: number = 10
+  ) {
+    let whereOptions: any = {};
+    const { status } = query;
+    if (status === 'OVERDUE') {
+      whereOptions.dueDate = { lte: new Date() };
+    }
+
     return this.prisma.borrowingProcess.findMany({
       include: { book: true, borrower: true },
-      where: { returnDate: null },
+      where: { returnDate: null, ...whereOptions },
+      skip: (page - 1) * limit,
+      take: limit,
     });
   }
 
-  async fetchUserBorrowedBooks(borrowerId: number) {
+  async findBorrowedBooksByBorrowerId(borrowerId: number) {
     return this.prisma.borrowingProcess.findMany({
       where: { borrowerId, returnDate: null },
       include: { book: true },
@@ -42,12 +54,8 @@ export class BorrowingRepository {
       include: { book: true, borrower: true },
     });
   }
-  async fetchBorrowingById(borrwingId: number) {
-    return this.prisma.borrowingProcess.findUnique({
-      where: { id: borrwingId },
-    });
-  }
-  async fetchCurrentBorrowingByBorrowerIdAndBookId(
+
+  async findCurrentBorrowingByBorrowerIdAndBookId(
     borrowerId: number,
     bookId: number
   ) {
@@ -55,6 +63,7 @@ export class BorrowingRepository {
       where: { borrowerId, bookId, returnDate: null },
     });
   }
+
   withTransaction(prisma: PrismaClient) {
     return new BorrowingRepository(prisma);
   }

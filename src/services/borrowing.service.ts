@@ -27,7 +27,7 @@ export class BorrowingService {
 
       await bookServiceTx.changeBookQuantity(bookId, -1);
       const oldBorrowings =
-        await borrowingRepoTx.fetchCurrentBorrowingByBorrowerIdAndBookId(
+        await borrowingRepoTx.findCurrentBorrowingByBorrowerIdAndBookId(
           borrowerId,
           bookId
         );
@@ -50,8 +50,15 @@ export class BorrowingService {
     });
   }
 
-  async fetchAllBorrowedBooks() {
-    const borrowings = await this.borrowingRepo.findAllBorrowedBooks();
+  async getAllBorrowedBooksAndBorrowers(
+    query: { status?: 'OVERDUE' },
+    page?: number
+  ) {
+    const borrowings =
+      await this.borrowingRepo.findAllBorrowedBooksIncludeBorrowers(
+        query,
+        page
+      );
     //Could be done in SQL I guess but this is just ok
     return borrowings.map((borrowing) => ({
       ...borrowing.book,
@@ -62,7 +69,8 @@ export class BorrowingService {
     }));
   }
   async fetchUserBorrowedBooks(userId: number) {
-    const borrowings = await this.borrowingRepo.fetchUserBorrowedBooks(userId);
+    const borrowings =
+      await this.borrowingRepo.findBorrowedBooksByBorrowerId(userId);
     return borrowings.map((borrowing) => ({
       ...borrowing.book,
       dueDate: borrowing.dueDate,

@@ -18,8 +18,8 @@ export class BookService {
     return book;
   }
 
-  async findAllBooks(searchString?: string) {
-    return this.bookRepo.findAll(searchString);
+  async getAllBooks(searchString?: string, page?: number) {
+    return this.bookRepo.findAll(searchString, page);
   }
 
   async updateBook(id: number, data: Partial<Prisma.BookCreateInput>) {

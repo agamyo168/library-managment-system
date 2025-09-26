@@ -59,8 +59,9 @@ export class BookController {
     res: Response,
     next: NextFunction
   ) => {
-    const { search }: GetBookQuery = req.query;
-    const books = await this.bookService.findAllBooks(search);
+    const { search, page }: GetBookQuery = req.query;
+
+    const books = await this.bookService.getAllBooks(search, +page);
     res.status(StatusCodes.OK).json({
       success: true,
       data: books,

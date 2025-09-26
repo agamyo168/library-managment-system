@@ -22,5 +22,6 @@ interface BookParams {
 }
 interface GetBookQuery {
   search: string;
+  page: number;
 }
 export { bookSchema, bookIdSchema, CreateBookDto, GetBookQuery, BookParams };

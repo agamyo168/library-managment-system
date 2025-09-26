@@ -45,7 +45,12 @@ export class BorrowingController {
     res: Response,
     next: NextFunction
   ) => {
-    const data = await this.borrowingService.fetchAllBorrowedBooks();
+    const { status, page = 1 } = req.query as any;
+    const query = { status };
+    const data = await this.borrowingService.getAllBorrowedBooksAndBorrowers(
+      query,
+      +page
+    );
 
     res.status(StatusCodes.OK).json({
       success: true,
