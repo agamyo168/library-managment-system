@@ -64,8 +64,9 @@ export class BorrowingController {
     res: Response,
     next: NextFunction
   ) => {
+    const { page } = req.query as any;
     const { id }: { id: number } = res.locals.payload;
-    const data = await this.borrowingService.fetchUserBorrowedBooks(+id);
+    const data = await this.borrowingService.getMyBorrowedBooks(+id, +page);
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Borrowed books list was fetched successfully!',

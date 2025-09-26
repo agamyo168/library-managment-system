@@ -42,10 +42,16 @@ export class BorrowingRepository {
     });
   }
 
-  async findBorrowedBooksByBorrowerId(borrowerId: number) {
+  async findBorrowedBooksByBorrowerId(
+    borrowerId: number,
+    page: number = 1,
+    limit: number = 10
+  ) {
     return this.prisma.borrowingProcess.findMany({
       where: { borrowerId, returnDate: null },
       include: { book: true },
+      skip: (page - 1) * limit,
+      take: limit,
     });
   }
   async fetchBorrowerPastDueDates() {

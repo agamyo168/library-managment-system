@@ -68,9 +68,11 @@ export class BorrowingService {
       },
     }));
   }
-  async fetchUserBorrowedBooks(userId: number) {
-    const borrowings =
-      await this.borrowingRepo.findBorrowedBooksByBorrowerId(userId);
+  async getMyBorrowedBooks(userId: number, page?: number) {
+    const borrowings = await this.borrowingRepo.findBorrowedBooksByBorrowerId(
+      userId,
+      page
+    );
     return borrowings.map((borrowing) => ({
       ...borrowing.book,
       dueDate: borrowing.dueDate,
