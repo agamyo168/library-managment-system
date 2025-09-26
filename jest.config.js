@@ -1,10 +1,12 @@
 module.exports = {
   // The directory where Jest should output its coverage files
-  coverageDirectory: "coverage",
+  moduleFileExtensions: ['js', 'json', 'ts'],
+  coverageDirectory: 'coverage',
   // The file extensions Jest should scan for tests
-  testMatch: ["**/__tests__/**/*.js?(x)", "**/?(*.)+(spec|test).js?(x)"],
+  testMatch: ['**/__tests__/**/*.ts?(x)', '**/?(*.)+(spec|test).ts?(x)'],
   // Any transformations to apply to test files before running them
   transform: {
-    "^.+\\.(js|jsx)$": "babel-jest",
+    '^.+\\.(t|j)s$': 'ts-jest',
   },
+  testEnvironment: 'node',
 };
