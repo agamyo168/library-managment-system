@@ -30,8 +30,10 @@ function randomBorrowingTimestamps() {
   let returnDate: Date | null = null;
 
   if (isReturned) {
-    // return date between createdAt and today (can exceed dueDate for late returns)
-    returnDate = randomDateBetween(createdAt, now);
+    const onTime = Math.random() < 0.7;
+    if (onTime) {
+      returnDate = randomDateBetween(createdAt, dueDate);
+    } else returnDate = randomDateBetween(createdAt, now);
   }
 
   return { createdAt, dueDate, returnDate };

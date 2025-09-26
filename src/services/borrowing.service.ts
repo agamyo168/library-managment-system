@@ -78,6 +78,11 @@ export class BorrowingService {
       dueDate: borrowing.dueDate,
     }));
   }
+
+  async getBorrowingReports(fromDate?: string) {
+    return this.borrowingRepo.findBorrowingCountReports(fromDate);
+  }
+
   async fetchDueDateBorrowedBooks() {
     const borrowings = await this.borrowingRepo.fetchBorrowerPastDueDates();
     //Could refactor these maps later

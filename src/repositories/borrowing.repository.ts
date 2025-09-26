@@ -1,4 +1,5 @@
-import { PrismaClient } from '../generated/prisma';
+import { Prisma, PrismaClient } from '../generated/prisma';
+import logger from '../helpers/logger';
 import { CheckoutParam } from '../schemas/borrowing.schema';
 import { PrismaTx } from '../types';
 export class BorrowingRepository {
@@ -60,7 +61,30 @@ export class BorrowingRepository {
       include: { book: true, borrower: true },
     });
   }
+  async findBorrowingCountReports(fromDate?: string) {
+    const whereClauses: Prisma.Sql[] = [];
+    if (fromDate) {
+      whereClauses.push(Prisma.sql`bp.created_at >= ${new Date(fromDate)}`);
+    }
+    const where =
+      whereClauses.length > 0
+        ? Prisma.sql`WHERE ${Prisma.join(whereClauses, ' AND ')}`
+        : Prisma.empty;
 
+    logger.info(where);
+    const data = await this.prisma.$queryRaw<
+      { count_borrows: bigint; return_count: bigint; overdue_counts: bigint }[]
+    >`
+    SELECT COUNT(id) AS count_borrows,COUNT(return_date) AS return_count, SUM(CASE WHEN due_date < COALESCE(return_date, NOW()) THEN 1 ELSE 0 END) AS overdue_counts
+    FROM borrowing_process bp
+    ${where};
+    `;
+    return {
+      borrows: Number(data[0].count_borrows),
+      returns: Number(data[0].return_count),
+      overDueCount: Number(data[0].overdue_counts),
+    };
+  }
   async findCurrentBorrowingByBorrowerIdAndBookId(
     borrowerId: number,
     bookId: number

@@ -45,11 +45,12 @@ export default function borrowingRoute(
     authHandlerMiddleware([UserRoleEnum.ADMIN]), // I think for such endpoints it's better to send back Not Found Error from a security POV
     asyncWrapper(borrowingController.getAllBorrowedBooksAndBorrowers)
   );
-  // router.get(
-  //   '/admin/due-dates',
-  //   authHandlerMiddleware([UserRoleEnum.ADMIN]),
-  //   asyncWrapper(borrowingController.fetchPastDueDateBooks)
-  // );
+
+  router.get(
+    '/reports',
+    authHandlerMiddleware([UserRoleEnum.ADMIN]),
+    asyncWrapper(borrowingController.getBorrowingReports)
+  );
 
   return router;
 }

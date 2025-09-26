@@ -59,6 +59,39 @@ export class BorrowingController {
     });
   };
 
+  public getBorrowingReports = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    let { download, fromDate } = req.query as any;
+    if (fromDate) {
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (!dateRegex.test(fromDate)) {
+        fromDate = undefined;
+      }
+    }
+    const data = await this.borrowingService.getBorrowingReports(fromDate);
+
+    if (download !== undefined) {
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader(
+        'Content-Disposition',
+        'attachment; filename=borrowings.csv'
+      );
+      return res
+        .status(StatusCodes.OK)
+        .send(
+          `BorrowCounts, ReturnCounts, OverdueCounts\n${data.borrows}, ${data.returns}, ${data.overDueCount}`
+        );
+    }
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Borrowing reports fetched successfully!',
+      data,
+    });
+  };
+
   public getMyBorrowedBooks = async (
     req: Request<any>,
     res: Response,
