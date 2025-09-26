@@ -52,12 +52,13 @@
     "seed": "ts-node --transpile-only prisma/seed.ts"
   },
   "scripts": {
+    "start": "node --env-file=.env dist/server.js",
     "test": "jest --coverage",
     "clean": "rm -rf dist/",
-    "build": "npm run clean && npx tsc",
-    "dev": "nodemon src/server.ts",
-    "docker": "docker compose up",
-    "start": "node --env-file=.env dist/server.js",
+    "build": "npx tsc",
+    "start:dev": "npx nodemon src/server.ts",
+    "docker:down": "sudo docker compose down",
+    "docker:up": "sudo docker compose --env-file .env.dev up --build",
     "format": "prettier --config ./.prettierrc --write \"src/**/*.{ts,js}\"",
     "migrate:deploy": "npx prisma migrate deploy",
     "generate": "npx prisma generate",

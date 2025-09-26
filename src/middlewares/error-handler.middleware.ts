@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import logger from '../helpers/logger';
 import CustomError from '../errors/custom/custom.error.class';
-import { PrismaClientKnownRequestError } from '../generated/prisma/runtime/library';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 const errorHandlerMiddleware = (
   err: CustomError,

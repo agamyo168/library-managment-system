@@ -1,5 +1,4 @@
-import { Prisma, PrismaClient } from '../generated/prisma';
-import logger from '../helpers/logger';
+import { Prisma, PrismaClient } from '@prisma/client';
 
 export class UserRepository {
   constructor(private prisma: PrismaClient) {}

@@ -1,14 +1,11 @@
 import { BorrowingRepository } from '../repositories/borrowing.repository';
-import { PrismaClient } from '../generated/prisma';
 import { BookService } from './book.service';
 import { BookRepository } from '../repositories/book.repository';
 import BadRequestError from '../errors/custom/bad.request.error.class';
-import { PrismaClientKnownRequestError } from '../generated/prisma/runtime/library';
 import ConflictError from '../errors/custom/conflict.error.class';
-import PrismaErrorCodes from '../constants/prisma-errors.constants';
 import { CheckoutParam } from '../schemas/borrowing.schema';
-import NotFound from '../errors/custom/notfound.error.class';
 import logger from '../helpers/logger';
+import { PrismaClient } from '@prisma/client';
 
 export class BorrowingService {
   constructor(

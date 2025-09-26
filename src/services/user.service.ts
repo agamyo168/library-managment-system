@@ -4,10 +4,7 @@ import { UserRepository } from '../repositories/user.repository';
 import { PEPPER, SALT } from '../constants/secrets';
 import { UserDto, LoginDto } from '../schemas/user.schema';
 import NotFound from '../errors/custom/notfound.error.class';
-import logger from '../helpers/logger';
-import { PrismaClientKnownRequestError } from '../generated/prisma/runtime/library';
-import ConflictError from '../errors/custom/conflict.error.class';
-import { Prisma } from '../generated/prisma';
+import { Prisma } from '@prisma/client';
 
 //TODO: Probably should create an AuthService separate from UserService
 export class UserService {

@@ -7,7 +7,6 @@ import errorHandlerMiddleware from './middlewares/error-handler.middleware';
 import helmet from 'helmet';
 // import swaggerDocument from './configs/swagger.config';
 import cors from 'cors';
-import { PrismaClient } from './generated/prisma';
 import { AuthController } from './api/controllers/auth.controller';
 import authRoutes from './api/routes/api/v1/auth.route';
 import {
@@ -28,6 +27,7 @@ import borrowingRoute from './api/routes/api/v1/borrowing.route';
 import { BorrowingController } from './api/controllers/borrowing.controller';
 import { BorrowingRepository } from './repositories/borrowing.repository';
 import { BorrowingService } from './services/borrowing.service';
+import { PrismaClient } from '@prisma/client';
 
 const app = express();
 const port = PORT || 3000;

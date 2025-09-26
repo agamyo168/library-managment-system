@@ -1,9 +1,6 @@
 import { BookRepository } from '../repositories/book.repository';
-import ConflictError from '../errors/custom/conflict.error.class';
-import logger from '../helpers/logger';
-import { Prisma, PrismaClient } from '../generated/prisma';
-import { PrismaClientKnownRequestError } from '../generated/prisma/runtime/library';
 import NotFound from '../errors/custom/notfound.error.class';
+import { Prisma, PrismaClient } from '@prisma/client';
 
 export class BookService {
   constructor(private bookRepo: BookRepository) {}

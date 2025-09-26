@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient } from '../generated/prisma';
+import { Prisma, PrismaClient } from '@prisma/client';
 import logger from '../helpers/logger';
 import { CheckoutParam } from '../schemas/borrowing.schema';
 import { PrismaTx } from '../types';
