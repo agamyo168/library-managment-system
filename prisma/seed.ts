@@ -7,14 +7,6 @@ const prisma = new PrismaClient();
 const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || '10', 10);
 const PEPPER = process.env.BCRYPT_SECRET_PEPPER || '';
 
-function randomDateWithinLastYear() {
-  const now = new Date();
-  const past = new Date(now);
-  past.setFullYear(now.getFullYear() - 1);
-  return new Date(
-    past.getTime() + Math.random() * (now.getTime() - past.getTime())
-  );
-}
 // helper: random date between two dates
 function randomDateBetween(start: Date, end: Date) {
   return new Date(

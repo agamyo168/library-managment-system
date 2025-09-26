@@ -1,42 +1,47 @@
 // src/controllers/book.controller.ts
 import { NextFunction, Request, Response } from 'express';
 import { BorrowingService } from '../../services/borrowing.service';
-import { CheckoutParam } from '../../schemas/borrowing.schema';
+import { BorrowingDto } from '../../schemas/borrowing.schema';
 import { StatusCodes } from 'http-status-codes';
-import logger from '../../helpers/logger';
 
 export class BorrowingController {
   constructor(private borrowingService: BorrowingService) {}
-  public checkout = async (req: Request<any>, res: Response) => {
-    const data: CheckoutParam = req.params;
+  public checkout = async (
+    req: Request<any, unknown, BorrowingDto>,
+    res: Response
+  ) => {
+    const { bookId } = req.body;
     const {
-      payload: { id: userId },
+      payload: { id: borrowerId },
     } = res.locals;
-    data.borrowerId = +userId;
-    data.bookId = +data.bookId;
+
+    const data = {
+      bookId: +bookId,
+      borrowerId: +borrowerId,
+    };
+
     await this.borrowingService.checkout(data);
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Book was borrowed successfully!',
     });
   };
+
   public return = async (
-    req: Request<any>,
+    req: Request<any, unknown, BorrowingDto>,
     res: Response,
     next: NextFunction
   ) => {
-    const { id }: { id: number } = req.params;
-    const {
-      payload: { id: userId },
-    } = res.locals;
-    await this.borrowingService.returnBook(+id, +userId);
+    const { id } = req.params;
+    await this.borrowingService.returnBook(+id);
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Book was returned successfully!',
     });
   };
-  public fetchAllBorrowedBooksAndBorrowers = async (
-    req: Request<any>,
+
+  public getAllBorrowedBooksAndBorrowers = async (
+    req: Request,
     res: Response,
     next: NextFunction
   ) => {
@@ -48,7 +53,8 @@ export class BorrowingController {
       data,
     });
   };
-  public fetchMyBorrowedBooks = async (
+
+  public getMyBorrowedBooks = async (
     req: Request<any>,
     res: Response,
     next: NextFunction
@@ -58,18 +64,6 @@ export class BorrowingController {
     res.status(StatusCodes.OK).json({
       success: true,
       message: 'Borrowed books list was fetched successfully!',
-      data,
-    });
-  };
-  public fetchPastDueDateBooks = async (
-    req: Request<any>,
-    res: Response,
-    next: NextFunction
-  ) => {
-    const data = await this.borrowingService.fetchDueDateBorrowedBooks();
-    res.status(StatusCodes.OK).json({
-      success: true,
-      message: 'Due date borrowed books list was fetched successfully!',
       data,
     });
   };

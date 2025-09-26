@@ -39,22 +39,19 @@ export class BorrowingService {
       await borrowingRepoTx.checkoutBook(data);
     });
   }
-  async returnBook(bookId: number, borrowerId: number) {
+  async returnBook(borrowingId: number) {
     await this.prisma.$transaction(async (tx) => {
       const bookServiceTx = new BookService(new BookRepository(tx));
       const borrowingRepoTx = new BorrowingRepository(tx);
-      const { count } = await borrowingRepoTx.returnBook(
-        bookId,
-        borrowerId //-> I pass this as a security check
+      const borrowing = await borrowingRepoTx.returnBook(
+        borrowingId //-> I pass this as a security check
       );
-      if (!count)
-        throw new NotFound('Book has already been returned or never borrowed');
-      await bookServiceTx.changeBookQuantity(bookId, 1);
+      await bookServiceTx.changeBookQuantity(borrowing.bookId, 1);
     });
   }
 
   async fetchAllBorrowedBooks() {
-    const borrowings = await this.borrowingRepo.fetchAllBorrowedBooks();
+    const borrowings = await this.borrowingRepo.findAllBorrowedBooks();
     //Could be done in SQL I guess but this is just ok
     return borrowings.map((borrowing) => ({
       ...borrowing.book,
